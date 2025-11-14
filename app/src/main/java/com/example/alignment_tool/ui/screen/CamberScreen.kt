@@ -21,15 +21,25 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.toArgb
 
+import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+
 @Composable
 fun CamberScreen() {
     var selectedWheel by remember { mutableStateOf("FL") }
     val tilt by rememberTilt(context = LocalContext.current)
+    val orientation = rememberOrientationAngles(context = LocalContext.current)
+    val roll = - orientation.value.third - 90f
+
 
     Column(modifier = Modifier.fillMaxSize()) {
         // Top 80%: Level indicator
         LevelIndicator(
             tilt = tilt,
+            camber = roll,
             modifier = Modifier
                 .weight(0.8f)
                 .fillMaxWidth()
@@ -99,12 +109,13 @@ fun CamberScreen() {
 }
 
 @Composable
-fun LevelIndicator(tilt: Pair<Float, Float>, modifier: Modifier = Modifier) {
+fun LevelIndicator(
+    tilt: Pair<Float, Float>,
+    camber: Float,
+    modifier: Modifier = Modifier
+) {
     // tilt.first = x-axis, tilt.second = y-axis, normalized -1..1
     val angle = atan2(tilt.second.toDouble(), tilt.first.toDouble()).toFloat() // in radians
-    val camberAngle: Float = Math.toDegrees(
-        atan2(tilt.second.toDouble(), tilt.first.toDouble())
-    ).toFloat() - 90f
     
     Canvas(modifier = modifier.fillMaxSize()) {
         val width = size.width
@@ -149,20 +160,54 @@ fun LevelIndicator(tilt: Pair<Float, Float>, modifier: Modifier = Modifier) {
             )
         }
 
-        drawContext.canvas.nativeCanvas.apply {
-            val paint = android.graphics.Paint().apply {
+        drawContext.canvas.nativeCanvas.drawText(
+            "Camber: %.1f°".format(camber),
+            26f,
+            centerY + 120f,
+            android.graphics.Paint().apply {
                 color = Color.LightGray.toArgb()
                 textSize = 48f
                 isAntiAlias = true
             }
-            drawText(
-                "Level: %.1f".format(camberAngle),
-                26f,                  // x-coordinate
-                centerY - 20f,        // y-coordinate
-                paint
-            )
+        )
+    }
+}
+
+@Composable
+fun rememberOrientationAngles(context: Context): State<Triple<Float, Float, Float>> {
+
+    val orientation = remember { mutableStateOf(Triple(0f, 0f, 0f)) }
+
+    DisposableEffect(Unit) {
+        val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        val rotationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
+
+        val rotationMatrix = FloatArray(9)
+        val orientationAngles = FloatArray(3)
+
+        val listener = object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent) {
+                SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
+                SensorManager.getOrientation(rotationMatrix, orientationAngles)
+
+                val azimuth = Math.toDegrees(orientationAngles[0].toDouble()).toFloat() // yaw
+                val pitch   = Math.toDegrees(orientationAngles[1].toDouble()).toFloat() // pitch
+                val roll    = Math.toDegrees(orientationAngles[2].toDouble()).toFloat() // roll
+
+                orientation.value = Triple(azimuth, pitch, roll)
+            }
+
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+        }
+
+        sensorManager.registerListener(listener, rotationSensor, SensorManager.SENSOR_DELAY_UI)
+
+        onDispose {
+            sensorManager.unregisterListener(listener)
         }
     }
+
+    return orientation
 }
 
 @Composable
