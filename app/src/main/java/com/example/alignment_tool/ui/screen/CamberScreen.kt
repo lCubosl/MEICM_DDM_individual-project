@@ -27,6 +27,11 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.rememberTextMeasurer
+
 @Composable
 fun CamberScreen() {
     var selectedWheel by remember { mutableStateOf("FL") }
@@ -40,6 +45,7 @@ fun CamberScreen() {
         LevelIndicator(
             tilt = tilt,
             camber = roll,
+            selectedWheel = selectedWheel,
             modifier = Modifier
                 .weight(0.8f)
                 .fillMaxWidth()
@@ -112,11 +118,13 @@ fun CamberScreen() {
 fun LevelIndicator(
     tilt: Pair<Float, Float>,
     camber: Float,
+    selectedWheel: String,
     modifier: Modifier = Modifier
 ) {
     // tilt.first = x-axis, tilt.second = y-axis, normalized -1..1
     val angle = atan2(tilt.second.toDouble(), tilt.first.toDouble()).toFloat() // in radians
-    
+    val textMeasurer = rememberTextMeasurer()
+
     Canvas(modifier = modifier.fillMaxSize()) {
         val width = size.width
         val height = size.height
@@ -160,15 +168,14 @@ fun LevelIndicator(
             )
         }
 
-        drawContext.canvas.nativeCanvas.drawText(
-            "Camber: %.1f°".format(camber),
-            26f,
-            centerY + 120f,
-            android.graphics.Paint().apply {
-                color = Color.LightGray.toArgb()
-                textSize = 48f
-                isAntiAlias = true
-            }
+        drawText(
+            textMeasurer = textMeasurer,
+            text = "$selectedWheel Camber: %.1f°".format(camber),
+            topLeft = Offset(26f, centerY + 120f),
+            style = TextStyle(
+                color = Color(0xFF90CAF9),
+                fontSize = 48.sp
+            )
         )
     }
 }
