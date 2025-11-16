@@ -28,6 +28,7 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import androidx.compose.runtime.*
+import androidx.compose.ui.draw.alpha
 import kotlin.math.atan2
 import androidx.compose.ui.platform.LocalContext
 
@@ -46,7 +47,8 @@ fun ToeScreen() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        // Top arrow
+
+        // TOP ARROW
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = "^",
@@ -57,26 +59,43 @@ fun ToeScreen() {
             Text(
                 text = "Front",
                 style = MaterialTheme.typography.titleMedium,
-                color  = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold
             )
         }
 
-        // Middle: front wheels, level bubble, rear wheels
+        // MAIN CENTER COLUMN (front wheels + toe + bubble + rear wheels)
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+
+            // FRONT WHEELS
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(120.dp, Alignment.CenterHorizontally)
             ) {
-                WheelWithLabel(label = "FL", isSelected = selectedWheel == "FL") { selectedWheel = "FL" }
-                WheelWithLabel(label = "FR", isSelected = selectedWheel == "FR") { selectedWheel = "FR" }
+                WheelWithLabel("FL", selectedWheel == "FL") { selectedWheel = "FL" }
+                WheelWithLabel("FR", selectedWheel == "FR") { selectedWheel = "FR" }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
+            // --- TOE TEXT HERE (centered between wheels) ---
+            val showToe = selectedWheel == "FL" || selectedWheel == "FR"
+            Text(
+                text = "Toe:\n0",
+                fontSize = 28.sp,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.alpha(if (showToe) 1f else 0f)
+            )
+            // ----------------------------------------------------
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // LEVEL BUBBLE
             LevelBubble(
                 modifier = Modifier.size(150.dp),
                 bubbleOffsetX = offsetX,
@@ -85,15 +104,17 @@ fun ToeScreen() {
 
             Spacer(modifier = Modifier.height(32.dp))
 
+            // REAR WHEELS
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(120.dp, Alignment.CenterHorizontally)
             ) {
-                WheelWithLabel(label = "RL", isSelected = selectedWheel == "RL") { selectedWheel = "RL" }
-                WheelWithLabel(label = "RR", isSelected = selectedWheel == "RR") { selectedWheel = "RR" }
+                WheelWithLabel("RL", selectedWheel == "RL") { selectedWheel = "RL" }
+                WheelWithLabel("RR", selectedWheel == "RR") { selectedWheel = "RR" }
             }
         }
 
+        // BOTTOM BUTTON (back where it was!)
         Button(
             onClick = { /* TODO */ },
             modifier = Modifier
