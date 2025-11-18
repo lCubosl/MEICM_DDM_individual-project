@@ -32,13 +32,29 @@ import androidx.compose.ui.draw.alpha
 import kotlin.math.atan2
 import androidx.compose.ui.platform.LocalContext
 
+fun calculateToe(offsetX: Float, offsetY: Float): Float {
+    // Replace with your real math!
+    return (offsetX * 10f)   // simple example
+}
+
 @Composable
 fun ToeScreen() {
     val context = LocalContext.current
     var selectedWheel by remember { mutableStateOf<String?>(null) }
 
+    // NEW: toe value state
+    var toeValue by remember { mutableStateOf(0f) }
+
     val tilt = rememberTilt(context)
     val (offsetX, offsetY) = tilt.value
+
+    // Whenever selectedWheel changes → update toeValue
+    LaunchedEffect(selectedWheel) {
+        when (selectedWheel) {
+            "FL" -> toeValue = 0f          // FL always shows 0
+            "FR" -> toeValue = calculateToe(offsetX, offsetY)
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -83,8 +99,9 @@ fun ToeScreen() {
 
             // --- TOE TEXT HERE (centered between wheels) ---
             val showToe = selectedWheel == "FL" || selectedWheel == "FR"
+
             Text(
-                text = "Toe:\n0",
+                text = "Toe:\n${toeValue}",
                 fontSize = 28.sp,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.primary,
