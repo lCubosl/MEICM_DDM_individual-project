@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.alpha
 import kotlin.math.atan2
 import androidx.compose.ui.platform.LocalContext
 
+// CALCULATETOE FUNCTION IS NOT WORKING CORRECTLY. MATH IS NOT MATHING
 fun calculateToe(offsetX: Float, offsetY: Float): Float {
     // Replace with your real math!
     return (offsetX * 10f)   // simple example
@@ -42,6 +43,7 @@ fun ToeScreen() {
     val context = LocalContext.current
     var selectedWheel by remember { mutableStateOf<String?>(null) }
 
+    // RETHINK THIS STATE. IS NOT BEING IMPLEMENTED CORRECTLY
     // NEW: toe value state
     var toeValue by remember { mutableStateOf(0f) }
 
@@ -97,6 +99,7 @@ fun ToeScreen() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // THIS IS WRONG. CHANGE IT IN ORDER TO ACTUALLY DISPLAY TOE, NOT RANDOM NUMBERS
             // --- TOE TEXT HERE (centered between wheels) ---
             val showToe = selectedWheel == "FL" || selectedWheel == "FR"
 
