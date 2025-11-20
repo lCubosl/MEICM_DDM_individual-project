@@ -33,11 +33,10 @@ import kotlin.math.atan2
 import androidx.compose.ui.platform.LocalContext
 
 // CALCULATETOE FUNCTION IS NOT WORKING CORRECTLY. MATH IS NOT MATHING
-// NO TIME TO CODE TODAY. CHEEKY COMMENT COMMIT
-fun calculateToe(offsetX: Float, offsetY: Float): Float {
-    // Replace with your real math!
-    return (offsetX * 10f)   // simple example
-}
+//fun calculateToe(offsetX: Float, offsetY: Float): Float {
+//    // Replace with your real math!
+//    return (offsetX * 10f)   // simple example
+//}
 
 @Composable
 fun ToeScreen() {
@@ -51,13 +50,13 @@ fun ToeScreen() {
     val tilt = rememberTilt(context)
     val (offsetX, offsetY) = tilt.value
 
-    // Whenever selectedWheel changes → update toeValue
-    LaunchedEffect(selectedWheel) {
-        when (selectedWheel) {
-            "FL" -> toeValue = 0f          // FL always shows 0
-            "FR" -> toeValue = calculateToe(offsetX, offsetY)
-        }
-    }
+//    // Whenever selectedWheel changes → update toeValue
+//    LaunchedEffect(selectedWheel) {
+//        when (selectedWheel) {
+//            "FL" -> toeValue = 0f          // FL always shows 0
+//            "FR" -> toeValue = calculateToe(offsetX, offsetY)
+//        }
+//    }
 
     Column(
         modifier = Modifier
