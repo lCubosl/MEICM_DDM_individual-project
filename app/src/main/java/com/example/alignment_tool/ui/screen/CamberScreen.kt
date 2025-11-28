@@ -121,9 +121,18 @@ fun LevelIndicator(
     selectedWheel: String,
     modifier: Modifier = Modifier
 ) {
-    // tilt.first = x-axis, tilt.second = y-axis, normalized -1..1
-    val angle = atan2(tilt.second.toDouble(), tilt.first.toDouble()).toFloat() // in radians
     val textMeasurer = rememberTextMeasurer()
+
+    // Clamp camber value for display
+    val displayCamber = camber.coerceIn(-20f, 20f)
+
+    // Compute raw tilt angle
+    val rawAngle = atan2(tilt.second.toDouble(), tilt.first.toDouble()).toFloat()
+
+    // Clamp tilt line to ±20° in radians
+    val maxAngleRad = Math.toRadians(270.0).toFloat()
+    val minAngleRad = Math.toRadians(20.0).toFloat()
+    val clampedAngle = rawAngle.coerceIn(minAngleRad, maxAngleRad)
 
     Canvas(modifier = modifier.fillMaxSize()) {
         val width = size.width
@@ -132,7 +141,7 @@ fun LevelIndicator(
         val centerX = width / 2
         val lineLength = width * 0.95f
 
-        // Grey horizontal line at center
+        // Grey horizontal line
         drawLine(
             color = Color.LightGray,
             start = Offset(centerX - lineLength / 2, centerY),
@@ -140,37 +149,32 @@ fun LevelIndicator(
             strokeWidth = 8f
         )
 
-        // Blue line representing phone tilt
-        val tiltLineLength = lineLength
-        val cosA = kotlin.math.cos(angle)
-        val sinA = kotlin.math.sin(angle)
-
+        // Blue tilt line clamped
+        val cosA = kotlin.math.cos(clampedAngle)
+        val sinA = kotlin.math.sin(clampedAngle)
         drawLine(
             color = Color(0xFF90CAF9),
-            start = Offset(
-                centerX - tiltLineLength / 2 * cosA,
-                centerY - tiltLineLength / 2 * sinA
-            ),
-            end = Offset(centerX + tiltLineLength / 2 * cosA, centerY + tiltLineLength / 2 * sinA),
+            start = Offset(centerX - lineLength / 2 * cosA, centerY - lineLength / 2 * sinA),
+            end = Offset(centerX + lineLength / 2 * cosA, centerY + lineLength / 2 * sinA),
             strokeWidth = 8f
         )
 
-        drawContext.canvas.nativeCanvas.apply {
-            drawText(
-                "Level:",
-                26f,                  // x-coordinate
-                centerY - 20f,         // y-coordinate, adjust to vertical center on line
-                android.graphics.Paint().apply {
-                    color = Color.LightGray.toArgb()
-                    textSize = 48f    // adjust as needed
-                    isAntiAlias = true
-                }
-            )
-        }
+        // Level text
+        drawContext.canvas.nativeCanvas.drawText(
+            "Level:",
+            26f,
+            centerY - 20f,
+            android.graphics.Paint().apply {
+                color = Color.LightGray.toArgb()
+                textSize = 48f
+                isAntiAlias = true
+            }
+        )
 
+        // Display camber value
         drawText(
             textMeasurer = textMeasurer,
-            text = "$selectedWheel Camber: %.1f°".format(camber),
+            text = "$selectedWheel Camber: %.1f°".format(displayCamber),
             topLeft = Offset(26f, centerY + 120f),
             style = TextStyle(
                 color = Color(0xFF90CAF9),
