@@ -129,7 +129,7 @@ fun LevelIndicator(
     // Compute raw tilt angle
     val rawAngle = atan2(tilt.second.toDouble(), tilt.first.toDouble()).toFloat()
 
-    // Clamp tilt line to ±20° in radians
+    // Clamp tilt line
     val maxAngleRad = Math.toRadians(270.0).toFloat()
     val minAngleRad = Math.toRadians(20.0).toFloat()
     val clampedAngle = rawAngle.coerceIn(minAngleRad, maxAngleRad)
@@ -158,6 +158,17 @@ fun LevelIndicator(
             end = Offset(centerX + lineLength / 2 * cosA, centerY + lineLength / 2 * sinA),
             strokeWidth = 8f
         )
+
+        // DEBBUG
+        drawContext.canvas.nativeCanvas.apply {
+            val paint = android.graphics.Paint().apply {
+                color = Color.Red.toArgb()
+                textSize = 36f
+                isAntiAlias = true
+            }
+            drawText("Raw angle: %.1f°".format(Math.toDegrees(rawAngle.toDouble())), 26f, centerY - 100f, paint)
+            drawText("Clamped angle: %.1f°".format(Math.toDegrees(clampedAngle.toDouble())), 26f, centerY - 60f, paint)
+        }
 
         // Level text
         drawContext.canvas.nativeCanvas.drawText(
