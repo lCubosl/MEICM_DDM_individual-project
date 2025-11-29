@@ -39,11 +39,12 @@ fun CamberScreen() {
     val orientation = rememberOrientationAngles(context = LocalContext.current)
     val roll = - orientation.value.third - 90f
 
-
     Column(modifier = Modifier.fillMaxSize()) {
         // Top 80%: Level indicator
+        val rotatedTilt = Pair(-tilt.first, -tilt.second)
+
         LevelIndicator(
-            tilt = tilt,
+            tilt = rotatedTilt,
             camber = roll,
             selectedWheel = selectedWheel,
             modifier = Modifier
@@ -126,13 +127,16 @@ fun LevelIndicator(
     // Clamp camber value for display
     val displayCamber = camber.coerceIn(-20f, 20f)
 
-    // Compute raw tilt angle
+    // Step 1: raw tilt in radians
     val rawAngle = atan2(tilt.second.toDouble(), tilt.first.toDouble()).toFloat()
 
-    // Clamp tilt line
-    val maxAngleRad = Math.toRadians(270.0).toFloat()
-    val minAngleRad = Math.toRadians(20.0).toFloat()
-    val clampedAngle = rawAngle.coerceIn(minAngleRad, maxAngleRad)
+    // Step 2: rotate raw tilt for display
+    val rotatedRawAngle = rawAngle + Math.PI.toFloat() // 90° rotation
+
+    // Step 3: clamp AFTER rotation
+    val minAngleRad = Math.toRadians(150.0).toFloat()
+    val maxAngleRad = Math.toRadians(210.0).toFloat()
+    val clampedAngle = rotatedRawAngle.coerceIn(minAngleRad, maxAngleRad)
 
     Canvas(modifier = modifier.fillMaxSize()) {
         val width = size.width
@@ -159,7 +163,7 @@ fun LevelIndicator(
             strokeWidth = 8f
         )
 
-        // DEBBUG
+        // DEBBUG for the phone tilt level
         drawContext.canvas.nativeCanvas.apply {
             val paint = android.graphics.Paint().apply {
                 color = Color.Red.toArgb()
