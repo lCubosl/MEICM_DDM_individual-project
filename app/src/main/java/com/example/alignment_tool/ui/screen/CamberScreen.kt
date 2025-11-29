@@ -130,13 +130,23 @@ fun LevelIndicator(
     // Step 1: raw tilt in radians
     val rawAngle = atan2(tilt.second.toDouble(), tilt.first.toDouble()).toFloat()
 
-    // Step 2: rotate raw tilt for display
-    val rotatedRawAngle = rawAngle + Math.PI.toFloat() // 90° rotation
+    // Step 2: rotate raw tilt for display (180° rotation)
+    val rotatedRawAngle = rawAngle + Math.PI.toFloat()
 
     // Step 3: clamp AFTER rotation
-    val minAngleRad = Math.toRadians(150.0).toFloat()
-    val maxAngleRad = Math.toRadians(210.0).toFloat()
+    val minAngleRad = Math.toRadians(155.0).toFloat()
+    val maxAngleRad = Math.toRadians(205.0).toFloat()
     val clampedAngle = rotatedRawAngle.coerceIn(minAngleRad, maxAngleRad)
+
+    // Step 4: determine line color
+    val perfectRad = Math.PI.toFloat()   // 180°
+    val greenZone = Math.toRadians(2.0).toFloat() // ±2° in radians
+
+    val lineColor = when {
+        rotatedRawAngle < minAngleRad || rotatedRawAngle > maxAngleRad -> Color.Red
+        kotlin.math.abs(rotatedRawAngle - perfectRad) <= greenZone -> Color.Green
+        else -> Color(0xFF90CAF9)
+    }
 
     Canvas(modifier = modifier.fillMaxSize()) {
         val width = size.width
@@ -153,26 +163,15 @@ fun LevelIndicator(
             strokeWidth = 8f
         )
 
-        // Blue tilt line clamped
+        // Tilt line with color depending on out-of-bounds / perfect
         val cosA = kotlin.math.cos(clampedAngle)
         val sinA = kotlin.math.sin(clampedAngle)
         drawLine(
-            color = Color(0xFF90CAF9),
+            color = lineColor,
             start = Offset(centerX - lineLength / 2 * cosA, centerY - lineLength / 2 * sinA),
             end = Offset(centerX + lineLength / 2 * cosA, centerY + lineLength / 2 * sinA),
             strokeWidth = 8f
         )
-
-        // DEBBUG for the phone tilt level
-        drawContext.canvas.nativeCanvas.apply {
-            val paint = android.graphics.Paint().apply {
-                color = Color.Red.toArgb()
-                textSize = 36f
-                isAntiAlias = true
-            }
-            drawText("Raw angle: %.1f°".format(Math.toDegrees(rawAngle.toDouble())), 26f, centerY - 100f, paint)
-            drawText("Clamped angle: %.1f°".format(Math.toDegrees(clampedAngle.toDouble())), 26f, centerY - 60f, paint)
-        }
 
         // Level text
         drawContext.canvas.nativeCanvas.drawText(
@@ -186,13 +185,16 @@ fun LevelIndicator(
             }
         )
 
+        // Compute tilt line color based on its rotation
+        val lineColor2 = if (displayCamber in -19.9..19.9) Color(0xFF90CAF9) else Color.Red
+
         // Display camber value
         drawText(
             textMeasurer = textMeasurer,
             text = "$selectedWheel Camber: %.1f°".format(displayCamber),
             topLeft = Offset(26f, centerY + 120f),
             style = TextStyle(
-                color = Color(0xFF90CAF9),
+                color = lineColor2,
                 fontSize = 48.sp
             )
         )
