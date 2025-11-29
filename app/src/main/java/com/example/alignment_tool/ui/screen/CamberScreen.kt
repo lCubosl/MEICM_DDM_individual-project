@@ -39,14 +39,26 @@ fun CamberScreen() {
     val orientation = rememberOrientationAngles(context = LocalContext.current)
     val roll = - orientation.value.third - 90f
 
+    // stores camber values after pressing SAVE button
+    val savedCambers = remember {
+        mutableStateMapOf<String, Float?>(
+            "FL" to null,
+            "FR" to null,
+            "RL" to null,
+            "RR" to null
+        )
+    }
+
     Column(modifier = Modifier.fillMaxSize()) {
         // Top 80%: Level indicator
         val rotatedTilt = Pair(-tilt.first, -tilt.second)
+        var lineColorGlobal by remember { mutableStateOf(Color.LightGray) }
 
         LevelIndicator(
             tilt = rotatedTilt,
             camber = roll,
             selectedWheel = selectedWheel,
+            onLineColorChanged = { lineColorGlobal = it },
             modifier = Modifier
                 .weight(0.8f)
                 .fillMaxWidth()
@@ -72,16 +84,32 @@ fun CamberScreen() {
             ) {
                 // left side of car
                 Row(horizontalArrangement = Arrangement.spacedBy(32.dp)) {
-                    SmallWheel(isSelected = selectedWheel == "RL") { selectedWheel = "RL" }
-                    SmallWheel(isSelected = selectedWheel == "FL") { selectedWheel = "FL" }
+                    SmallWheel(
+                        label = "RL",
+                        isSelected = selectedWheel == "RL",
+                        savedCamber = savedCambers["RL"],
+                    ) { selectedWheel = "RL" }
+                    SmallWheel(
+                        label = "FL",
+                        isSelected = selectedWheel == "FL",
+                        savedCamber = savedCambers["FL"],
+                    ) { selectedWheel = "FL" }
                 }
 
                 Spacer(modifier = Modifier.height(32.dp))
 
                 // right side of car
                 Row(horizontalArrangement = Arrangement.spacedBy(32.dp)) {
-                    SmallWheel(isSelected = selectedWheel == "RR") { selectedWheel = "RR" }
-                    SmallWheel(isSelected = selectedWheel == "FR") { selectedWheel = "FR" }
+                    SmallWheel(
+                        label = "RR",
+                        isSelected = selectedWheel == "RR",
+                        savedCamber = savedCambers["RR"],
+                    ) { selectedWheel = "RR" }
+                    SmallWheel(
+                        label = "FR",
+                        isSelected = selectedWheel == "FR",
+                        savedCamber = savedCambers["FR"],
+                    ) { selectedWheel = "FR" }
                 }
             }
 
@@ -95,9 +123,12 @@ fun CamberScreen() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Button(
-                    onClick = { /* TODO Save */ },
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f)
+                    onClick = {
+                        if (lineColorGlobal == Color.Green) {   // <-- we will set lineColorGlobal
+                            savedCambers[selectedWheel] = roll  // store the raw roll value
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(0.8f)
                 ) {
                     Text("Save")
                 }
@@ -120,6 +151,7 @@ fun LevelIndicator(
     tilt: Pair<Float, Float>,
     camber: Float,
     selectedWheel: String,
+    onLineColorChanged: (Color) -> Unit,   // NEW
     modifier: Modifier = Modifier
 ) {
     val textMeasurer = rememberTextMeasurer()
@@ -146,6 +178,10 @@ fun LevelIndicator(
         rotatedRawAngle < minAngleRad || rotatedRawAngle > maxAngleRad -> Color.Red
         kotlin.math.abs(rotatedRawAngle - perfectRad) <= greenZone -> Color.Green
         else -> Color(0xFF90CAF9)
+    }
+
+    LaunchedEffect(lineColor) {
+        onLineColorChanged(lineColor)
     }
 
     Canvas(modifier = modifier.fillMaxSize()) {
@@ -252,14 +288,43 @@ fun rememberOrientationAngles(context: Context): State<Triple<Float, Float, Floa
 }
 
 @Composable
-fun SmallWheel(isSelected: Boolean, onClick: () -> Unit) {
-    val backgroundColor = if (isSelected) Color(0xFF90CAF9) else Color.LightGray
-
+fun SmallWheel(
+    label: String,              // <-- NEW: FL, FR, RL, RR
+    isSelected: Boolean,
+    savedCamber: Float?,
+    onClick: () -> Unit
+) {
     Box(
         modifier = Modifier
-            .size(width = 60.dp, height = 30.dp) // swap width/height for horizontal look
-            .background(backgroundColor, RoundedCornerShape(8.dp))
-            .clickable { onClick() }
-    )
-}
+            .size(width = 80.dp, height = 50.dp)
+            .background(
+                if (isSelected) Color(0xFF90CAF9) else Color.LightGray,
+                RoundedCornerShape(8.dp)
+            )
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.graphicsLayer {
+                rotationZ = 90f   // rotate both texts together
+            }
+        ) {
+            // Wheel label (FL, FR, RL, RR)
+            Text(
+                text = label,
+                color = Color.White,
+                fontSize = 12.sp
+            )
 
+            // Camber value
+            if (savedCamber != null) {
+                Text(
+                    text = "%.1f°".format(savedCamber),
+                    color = Color.White,
+                    fontSize = 12.sp
+                )
+            }
+        }
+    }
+}
