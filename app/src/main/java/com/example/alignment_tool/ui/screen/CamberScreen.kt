@@ -122,6 +122,7 @@ fun CamberScreen() {
                 verticalArrangement = Arrangement.SpaceEvenly,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // SAVE CAMBER TO WHEEL BUTTON
                 Button(
                     onClick = {
                         if (lineColorGlobal == Color.Green) {   // <-- we will set lineColorGlobal
@@ -133,13 +134,16 @@ fun CamberScreen() {
                     Text("Save")
                 }
 
+                // RESET WHEEL CAMBER BUTTON
                 Button(
-                    onClick = { /* TODO Back */ },
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f)
+                    onClick = { savedCambers[selectedWheel] = null },
+                    enabled = savedCambers[selectedWheel] != null,
+                    modifier = Modifier.fillMaxWidth(0.8f)
                 ) {
-                    Text("Back")
+                    Text("Reset")
                 }
+
+
             }
 
         }
