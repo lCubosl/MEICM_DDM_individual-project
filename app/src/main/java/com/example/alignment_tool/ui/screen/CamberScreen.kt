@@ -39,6 +39,7 @@ fun CamberScreen() {
     val orientation = rememberOrientationAngles(context = LocalContext.current)
     val roll = - orientation.value.third - 90f
 
+    var showConfirmDialog by remember { mutableStateOf(false) }
     // stores camber values after pressing SAVE button
     val savedCambers = remember {
         mutableStateMapOf<String, Float?>(
@@ -49,10 +50,44 @@ fun CamberScreen() {
         )
     }
 
+    if (showConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showConfirmDialog = false },
+            title = {
+                Text("Save All Cambers?")
+            },
+            text = {
+                Text("Are you sure that you want to save the current camber values?")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        saveAllCambers(savedCambers)
+                        // Reset camber values after saving
+                        savedCambers.keys.forEach { key ->
+                            savedCambers[key] = null
+                        }
+                        showConfirmDialog = false
+                    }
+                ) {
+                    Text("Yes", color = Color.Black)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showConfirmDialog = false }
+                ) {
+                    Text("No", color = Color.Black)
+                }
+            }
+        )
+    }
+
     Column(modifier = Modifier.fillMaxSize()) {
         // Top 80%: Level indicator
         val rotatedTilt = Pair(-tilt.first, -tilt.second)
         var lineColorGlobal by remember { mutableStateOf(Color.LightGray) }
+        val allWheelsSaved = savedCambers.values.all { it != null }
 
         LevelIndicator(
             tilt = rotatedTilt,
@@ -125,14 +160,28 @@ fun CamberScreen() {
                 // SAVE CAMBER TO WHEEL BUTTON
                 Button(
                     onClick = {
-                        if (lineColorGlobal == Color.Green) {   // <-- we will set lineColorGlobal
-                            savedCambers[selectedWheel] = roll  // store the raw roll value
+                        if (!allWheelsSaved) {
+                            // Normal Save for current wheel
+                            if (lineColorGlobal == Color.Green) {
+                                savedCambers[selectedWheel] = roll
+                            }
+                        } else {
+                            // Trigger confirmation dialog
+                            showConfirmDialog = true
                         }
                     },
-                    modifier = Modifier.fillMaxWidth(0.8f)
+                    modifier = Modifier.fillMaxWidth(0.8f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (allWheelsSaved) Color(0xFF4CAF50) else MaterialTheme.colorScheme.primary
+                    )
                 ) {
-                    Text("Save")
+                    Text(
+                        text = if (allWheelsSaved) "Save All" else "Save",
+                        color = Color.White
+                    )
                 }
+
+
 
                 // RESET WHEEL CAMBER BUTTON
                 Button(
@@ -331,4 +380,9 @@ fun SmallWheel(
             }
         }
     }
+}
+
+fun saveAllCambers(cambers: Map<String, Float?>) {
+    // TODO: SAVE VALUES TO DB
+    println("Saving all camber values: $cambers")
 }
