@@ -31,6 +31,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.draw.alpha
 import kotlin.math.atan2
 import androidx.compose.ui.platform.LocalContext
+import kotlin.math.sqrt
+import androidx.compose.ui.graphics.drawscope.Stroke
+
 
 // CALCULATETOE FUNCTION IS NOT WORKING CORRECTLY. MATH IS NOT MATHING
 //fun calculateToe(offsetX: Float, offsetY: Float): Float {
@@ -196,44 +199,51 @@ fun rememberTilt(context: Context): State<Pair<Float, Float>> {
 @Composable
 fun LevelBubble(
     modifier: Modifier = Modifier,
-    bubbleOffsetX: Float = 0f,  // -1..1, horizontal tilt, can go beyond 1/-1
-    bubbleOffsetY: Float = 0f   // -1..1, vertical tilt
+    bubbleOffsetX: Float = 0f,  // -1..1
+    bubbleOffsetY: Float = 0f   // -1..1
 ) {
-    val bubbleColor = MaterialTheme.colorScheme.primary
+    // Distance from center (0 = perfect, 1 = max tilt)
+    val distance = sqrt(bubbleOffsetX * bubbleOffsetX + bubbleOffsetY * bubbleOffsetY)
+
+    // Color thresholds
+    val bubbleColor =
+        when {
+            distance < 0.10f -> Color(0xFF4CAF50)        // GREEN (perfect)
+            distance < 0.40f -> Color(0xFF90CAF9)        // BLUE (ok-ish)
+            else -> Color.Red                             // RED (too far)
+        }
 
     Canvas(modifier = modifier) {
         val radius = size.minDimension / 2f
 
-        // Outer circle slightly bigger than the dot (just for reference)
+        // Outer reference rings
         val outerRadius = 20.dp.toPx()
         drawCircle(
             color = Color.LightGray,
             radius = outerRadius,
             center = Offset(radius, radius),
-            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 4f)
+            style = Stroke(width = 4f)
         )
 
-        // Outer circle slightly bigger than the dot (just for reference)
-        val outerRadius2 = 20.dp.toPx() + 10.dp.toPx()
+        val outerRadius2 = outerRadius + 10.dp.toPx()
         drawCircle(
             color = Color.LightGray,
             radius = outerRadius2,
             center = Offset(radius, radius),
-            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 4f)
+            style = Stroke(width = 4f)
         )
 
-        // Outer circle slightly bigger than the dot (just for reference)
-        val outerRadius3 = 20.dp.toPx() + 20.dp.toPx()
+        val outerRadius3 = outerRadius + 20.dp.toPx()
         drawCircle(
             color = Color.LightGray,
             radius = outerRadius3,
             center = Offset(radius, radius),
-            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 4f)
+            style = Stroke(width = 4f)
         )
 
-        // Dot inside (can move beyond outer circle)
+        // Bubble position
         val dotRadius = 15.dp.toPx()
-        val centerX = radius + bubbleOffsetX * radius // full radius range
+        val centerX = radius + bubbleOffsetX * radius
         val centerY = radius + bubbleOffsetY * radius
 
         drawCircle(
@@ -243,7 +253,6 @@ fun LevelBubble(
         )
     }
 }
-
 
 @Composable
 fun WheelWithLabel(label: String, isSelected: Boolean, onClick: () -> Unit) {
