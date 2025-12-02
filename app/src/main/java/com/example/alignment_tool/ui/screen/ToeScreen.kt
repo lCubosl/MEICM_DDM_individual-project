@@ -139,44 +139,14 @@ fun ToeScreen() {
 
     var tireWidthMm by remember { mutableStateOf(205f) }
 
-    // --- Tire Width Dropdown ---
+    // Tire Width Dropdown
     var expanded by remember { mutableStateOf(false) }
-
     val tireWidths = listOf(185, 195, 205, 215, 225, 235, 245, 255)
 
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
-    ) {
-        Text("Tire Width (mm)", fontWeight = FontWeight.Bold)
-
-        Box {
-            OutlinedButton(
-                onClick = { expanded = !expanded },
-                modifier = Modifier.width(180.dp)
-            ) {
-                Text("${tireWidthMm.toInt()} mm")
-            }
-
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
-                tireWidths.forEach { width ->
-                    DropdownMenuItem(
-                        text = { Text("$width mm") },
-                        onClick = {
-                            tireWidthMm = width.toFloat()
-                            expanded = false
-                        }
-                    )
-                }
-            }
-        }
-    }
-
-    Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
@@ -197,7 +167,6 @@ fun ToeScreen() {
                 WheelWithLabel("FL", selectedWheel == "FL") {
                     selectedWheel = "FL"
                     wheelYaw["FL"] = yaw
-
                     wheelYaw["FR"]?.let { frYaw ->
                         frontToe = calculateToeMm(wheelYaw["FL"]!!, frYaw, tireWidthMm)
                     }
@@ -206,7 +175,6 @@ fun ToeScreen() {
                 WheelWithLabel("FR", selectedWheel == "FR") {
                     selectedWheel = "FR"
                     wheelYaw["FR"] = yaw
-
                     wheelYaw["FL"]?.let { flYaw ->
                         frontToe = calculateToeMm(flYaw, wheelYaw["FR"]!!, tireWidthMm)
                     }
@@ -247,18 +215,61 @@ fun ToeScreen() {
             }
         }
 
-        // RESET BUTTON
-        Button(
-            onClick = {
-                wheelYaw.clear()
-                frontToe = null
-            },
-            modifier = Modifier.fillMaxWidth(0.8f)
+        // BOTTOM ROW: Restart button (2/3) + Tire Width Dropdown (1/3)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Restart", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            // Restart button (2/3 width)
+            Button(
+                onClick = {
+                    wheelYaw.clear()
+                    frontToe = null
+                },
+                modifier = Modifier
+                    .weight(2f)
+                    .height(55.dp)
+            ) {
+                Text("Restart", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            // Tire Width dropdown (1/3 width)
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(55.dp)
+            ) {
+                OutlinedButton(
+                    onClick = { expanded = !expanded },
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Text("${tireWidthMm.toInt()} mm")
+                }
+
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    tireWidths.forEach { width ->
+                        DropdownMenuItem(
+                            text = { Text("$width mm") },
+                            onClick = {
+                                tireWidthMm = width.toFloat()
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+            }
         }
     }
 }
+
 
 // ----------------------------------------------------------
 //  LEVEL BUBBLE  (your colored bubble logic included)
