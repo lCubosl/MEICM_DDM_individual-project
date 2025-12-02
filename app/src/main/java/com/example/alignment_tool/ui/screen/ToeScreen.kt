@@ -167,33 +167,38 @@ fun ToeScreen() {
                 WheelWithLabel("FL", selectedWheel == "FL") {
                     selectedWheel = "FL"
                     wheelYaw["FL"] = yaw
-                    wheelYaw["FR"]?.let { frYaw ->
-                        frontToe = calculateToeMm(wheelYaw["FL"]!!, frYaw, tireWidthMm)
+
+                    frontToe = if (wheelYaw.containsKey("FR")) {
+                        calculateToeMm(wheelYaw["FL"]!!, wheelYaw["FR"]!!, tireWidthMm)
+                    } else {
+                        0f  // show 0 if only FL selected
                     }
                 }
 
                 WheelWithLabel("FR", selectedWheel == "FR") {
                     selectedWheel = "FR"
                     wheelYaw["FR"] = yaw
-                    wheelYaw["FL"]?.let { flYaw ->
-                        frontToe = calculateToeMm(flYaw, wheelYaw["FR"]!!, tireWidthMm)
+
+                    frontToe = if (wheelYaw.containsKey("FL")) {
+                        calculateToeMm(wheelYaw["FL"]!!, wheelYaw["FR"]!!, tireWidthMm)
+                    } else {
+                        0f  // show 0 if only FR selected
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+// TOE DISPLAY
+            val showToe = wheelYaw.containsKey("FL") || wheelYaw.containsKey("FR")
 
-            // TOE VALUE DISPLAY
-            val toeText =
-                if (frontToe == null) "Front Toe:\n0.0 mm"
-                else "Front Toe:\n${"%.2f".format(frontToe)} mm"
-
-            Text(
-                toeText,
-                fontSize = 28.sp,
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold
-            )
+            if (showToe) {
+                val toeText = "Front Toe:\n${"%.2f".format(frontToe ?: 0f)} mm"
+                Text(
+                    text = toeText,
+                    fontSize = 28.sp,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold
+                )
+            }
 
             Spacer(modifier = Modifier.height(20.dp))
 
