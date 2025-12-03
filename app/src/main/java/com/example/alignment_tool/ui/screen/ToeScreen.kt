@@ -31,7 +31,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 // ----------------------------------------------------------
 @Composable
 fun rememberYaw(context: Context): State<Float> {
-    val yawState = remember { mutableStateOf(0f) }
+    val yawState = remember { mutableFloatStateOf(0f) }
 
     DisposableEffect(Unit) {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -50,7 +50,7 @@ fun rememberYaw(context: Context): State<Float> {
 
                 if (yawDeg < 0) yawDeg += 360f
 
-                yawState.value = yawDeg
+                yawState.floatValue = yawDeg
             }
 
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
@@ -137,7 +137,7 @@ fun ToeScreen() {
     // toe result
     var frontToe by remember { mutableStateOf<Float?>(null) }
 
-    var tireWidthMm by remember { mutableStateOf(205f) }
+    var tireWidthMm by remember { mutableFloatStateOf(205f) }
 
     // Tire Width Dropdown
     var expanded by remember { mutableStateOf(false) }
