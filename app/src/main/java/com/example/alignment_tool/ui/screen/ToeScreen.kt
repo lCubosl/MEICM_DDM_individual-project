@@ -110,15 +110,6 @@ fun rememberTilt(context: Context): State<Pair<Float, Float>> {
 }
 
 // ----------------------------------------------------------
-//  TOE CALCULATION FUNCTION  <-- PLACE IT HERE
-// ----------------------------------------------------------
-fun calculateToeMm(yaw1: Float, yaw2: Float, tireWidthMm: Float): Float {
-    val deltaYaw = yaw2 - yaw1
-    val radius = tireWidthMm / 2f     // tire width is track width for toe
-    return kotlin.math.tan(deltaYaw) * radius
-}
-
-// ----------------------------------------------------------
 //  MAIN TOE SCREEN
 // ----------------------------------------------------------
 @Composable
@@ -134,19 +125,21 @@ fun ToeScreen() {
     // store yaw measurements per wheel
     val wheelYaw = remember { mutableStateMapOf<String, Float>() }
 
-    // toe result
+    // toe result (degrees)
     var frontToe by remember { mutableStateOf<Float?>(null) }
 
-    var tireWidthMm by remember { mutableFloatStateOf(205f) }
+    // toe visibility
+    var showToe by remember { mutableStateOf(false) }
 
-    // Tire Width Dropdown
-    var expanded by remember { mutableStateOf(false) }
-    val tireWidths = listOf(185, 195, 205, 215, 225, 235, 245, 255)
+    fun calculateToeAngle(left: Float, right: Float): Float {
+        var delta = right - left
+        if (delta > 180f) delta -= 360f
+        if (delta < -180f) delta += 360f
+        return delta
+    }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+        modifier = Modifier.fillMaxSize().padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
@@ -168,10 +161,11 @@ fun ToeScreen() {
                     selectedWheel = "FL"
                     wheelYaw["FL"] = yaw
 
-                    frontToe = if (wheelYaw.containsKey("FR")) {
-                        calculateToeMm(wheelYaw["FL"]!!, wheelYaw["FR"]!!, tireWidthMm)
-                    } else {
-                        0f  // show 0 if only FL selected
+                    showToe = true
+                    frontToe = 0f  // First wheel selected → show 0°
+
+                    wheelYaw["FR"]?.let { frYaw ->
+                        frontToe = calculateToeAngle(wheelYaw["FL"]!!, frYaw)
                     }
                 }
 
@@ -179,19 +173,21 @@ fun ToeScreen() {
                     selectedWheel = "FR"
                     wheelYaw["FR"] = yaw
 
-                    frontToe = if (wheelYaw.containsKey("FL")) {
-                        calculateToeMm(wheelYaw["FL"]!!, wheelYaw["FR"]!!, tireWidthMm)
-                    } else {
-                        0f  // show 0 if only FR selected
+                    showToe = true
+                    frontToe = 0f
+
+                    wheelYaw["FL"]?.let { flYaw ->
+                        frontToe = calculateToeAngle(flYaw, wheelYaw["FR"]!!)
                     }
                 }
             }
 
-// TOE DISPLAY
-            val showToe = wheelYaw.containsKey("FL") || wheelYaw.containsKey("FR")
+            Spacer(modifier = Modifier.height(20.dp))
 
+            // TOE VALUE DISPLAY
             if (showToe) {
-                val toeText = "Front Toe:\n${"%.2f".format(frontToe ?: 0f)} mm"
+                val toeText = "Front Toe:\n${"%.2f".format(frontToe ?: 0f)}°"
+
                 Text(
                     text = toeText,
                     fontSize = 28.sp,
@@ -210,7 +206,7 @@ fun ToeScreen() {
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // REAR WHEELS (not used yet)
+            // REAR WHEELS (placeholders)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(120.dp, Alignment.CenterHorizontally)
@@ -220,60 +216,21 @@ fun ToeScreen() {
             }
         }
 
-        // BOTTOM ROW: Restart button (2/3) + Tire Width Dropdown (1/3)
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        // RESET BUTTON
+        Button(
+            onClick = {
+                wheelYaw.clear()
+                frontToe = null
+                showToe = false
+                selectedWheel = null
+            },
+            modifier = Modifier.fillMaxWidth(0.8f)
         ) {
-            // Restart button (2/3 width)
-            Button(
-                onClick = {
-                    wheelYaw.clear()
-                    frontToe = null
-                },
-                modifier = Modifier
-                    .weight(2f)
-                    .height(55.dp)
-            ) {
-                Text("Restart", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            // Tire Width dropdown (1/3 width)
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(55.dp)
-            ) {
-                OutlinedButton(
-                    onClick = { expanded = !expanded },
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    Text("${tireWidthMm.toInt()} mm")
-                }
-
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    tireWidths.forEach { width ->
-                        DropdownMenuItem(
-                            text = { Text("$width mm") },
-                            onClick = {
-                                tireWidthMm = width.toFloat()
-                                expanded = false
-                            }
-                        )
-                    }
-                }
-            }
+            Text("Restart", fontSize = 18.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
+
 
 
 // ----------------------------------------------------------
