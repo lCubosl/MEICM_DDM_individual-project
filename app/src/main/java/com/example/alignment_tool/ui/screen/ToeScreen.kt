@@ -22,6 +22,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import kotlin.math.sqrt
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -125,11 +126,12 @@ fun ToeScreen() {
     // store yaw measurements per wheel
     val wheelYaw = remember { mutableStateMapOf<String, Float>() }
 
-    // toe result (degrees)
     var frontToe by remember { mutableStateOf<Float?>(null) }
+    var showFrontToe by remember { mutableStateOf(false) }
 
-    // toe visibility
-    var showToe by remember { mutableStateOf(false) }
+    var rearToe by remember { mutableStateOf<Float?>(null) }
+    var showRearToe by remember { mutableStateOf(false) }
+
 
     fun calculateToeAngle(left: Float, right: Float): Float {
         var delta = right - left
@@ -161,7 +163,7 @@ fun ToeScreen() {
                     selectedWheel = "FL"
                     wheelYaw["FL"] = yaw
 
-                    showToe = true
+                    showFrontToe = true
                     frontToe = 0f  // First wheel selected → show 0°
 
                     wheelYaw["FR"]?.let { frYaw ->
@@ -173,7 +175,7 @@ fun ToeScreen() {
                     selectedWheel = "FR"
                     wheelYaw["FR"] = yaw
 
-                    showToe = true
+                    showFrontToe = true
                     frontToe = 0f
 
                     wheelYaw["FL"]?.let { flYaw ->
@@ -182,21 +184,21 @@ fun ToeScreen() {
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
-            // TOE VALUE DISPLAY
-            if (showToe) {
-                val toeText = "Front Toe:\n${"%.2f".format(frontToe ?: 0f)}°"
+            // TOE VALUE DISPLAY (always takes space, just changes visibility)
+            val toeText = "Front Toe:\n${"%.2f".format(frontToe ?: 0f)}°"
 
-                Text(
-                    text = toeText,
-                    fontSize = 28.sp,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            Text(
+                text = toeText,
+                fontSize = 28.sp,
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.alpha(if (showFrontToe) 1f else 0f)
+            )
 
-            Spacer(modifier = Modifier.height(20.dp))
+
+            Spacer(modifier = Modifier.height(10.dp))
 
             LevelBubble(
                 modifier = Modifier.size(150.dp),
@@ -204,16 +206,45 @@ fun ToeScreen() {
                 bubbleOffsetY = offsetY
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
-            // REAR WHEELS (placeholders)
+            // REAR WHEELS
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(120.dp, Alignment.CenterHorizontally)
             ) {
-                WheelWithLabel("RL", selectedWheel == "RL") {}
-                WheelWithLabel("RR", selectedWheel == "RR") {}
+                WheelWithLabel("RL", selectedWheel == "RL") {
+                    selectedWheel = "RL"
+                    wheelYaw["RL"] = yaw
+                    showRearToe = true
+                    rearToe = 0f
+                    wheelYaw["RR"]?.let { rrYaw ->
+                        rearToe = calculateToeAngle(wheelYaw["RL"]!!, rrYaw)
+                    }
+                }
+
+                WheelWithLabel("RR", selectedWheel == "RR") {
+                    selectedWheel = "RR"
+                    wheelYaw["RR"] = yaw
+                    showRearToe = true
+                    rearToe = 0f
+                    wheelYaw["RL"]?.let { rlYaw ->
+                        rearToe = calculateToeAngle(rlYaw, wheelYaw["RR"]!!)
+                    }
+                }
             }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // REAR TOE DISPLAY (separate from Row – fixes everything)
+            val rearToeText = "Rear Toe:\n${"%.2f".format(rearToe ?: 0f)}°"
+            Text(
+                text = rearToeText,
+                fontSize = 26.sp,
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.alpha(if (showRearToe) 1f else 0f)
+            )
         }
 
         // RESET BUTTON
@@ -221,7 +252,9 @@ fun ToeScreen() {
             onClick = {
                 wheelYaw.clear()
                 frontToe = null
-                showToe = false
+                showFrontToe = false
+                rearToe = null
+                showRearToe = false
                 selectedWheel = null
             },
             modifier = Modifier.fillMaxWidth(0.8f)
