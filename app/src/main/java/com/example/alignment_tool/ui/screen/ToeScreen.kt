@@ -22,6 +22,8 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import kotlin.math.sqrt
@@ -122,8 +124,6 @@ fun ToeScreen() {
     val (offsetX, offsetY) = tilt
 
     var selectedWheel by remember { mutableStateOf<String?>(null) }
-
-    // store yaw measurements per wheel
     val wheelYaw = remember { mutableStateMapOf<String, Float>() }
 
     var frontToe by remember { mutableStateOf<Float?>(null) }
@@ -132,7 +132,6 @@ fun ToeScreen() {
     var rearToe by remember { mutableStateOf<Float?>(null) }
     var showRearToe by remember { mutableStateOf(false) }
 
-
     fun calculateToeAngle(left: Float, right: Float): Float {
         var delta = right - left
         if (delta > 180f) delta -= 360f
@@ -140,134 +139,201 @@ fun ToeScreen() {
         return delta
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
 
-        // TOP LABEL
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("^", fontSize = 36.sp, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-            Text("Front", fontSize = 22.sp, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-        }
+        // Main content
+        Column(
+            modifier = Modifier.fillMaxSize().padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
 
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-
-            // FRONT WHEELS
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(120.dp, Alignment.CenterHorizontally)
-            ) {
-                WheelWithLabel("FL", selectedWheel == "FL") {
-                    selectedWheel = "FL"
-                    wheelYaw["FL"] = yaw
-
-                    showFrontToe = true
-                    frontToe = 0f  // First wheel selected → show 0°
-
-                    wheelYaw["FR"]?.let { frYaw ->
-                        frontToe = calculateToeAngle(wheelYaw["FL"]!!, frYaw)
-                    }
-                }
-
-                WheelWithLabel("FR", selectedWheel == "FR") {
-                    selectedWheel = "FR"
-                    wheelYaw["FR"] = yaw
-
-                    showFrontToe = true
-                    frontToe = 0f
-
-                    wheelYaw["FL"]?.let { flYaw ->
-                        frontToe = calculateToeAngle(flYaw, wheelYaw["FR"]!!)
-                    }
-                }
+            // Top Label
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    "^",
+                    fontSize = 36.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    "Front",
+                    fontSize = 22.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
+                )
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
-            // TOE VALUE DISPLAY (always takes space, just changes visibility)
-            val toeText = "Front Toe:\n${"%.2f".format(frontToe ?: 0f)}°"
+                // Front Wheels
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(120.dp, Alignment.CenterHorizontally)
+                ) {
+                    WheelWithLabel("FL", selectedWheel == "FL") { selectedWheel = "FL" }
+                    WheelWithLabel("FR", selectedWheel == "FR") { selectedWheel = "FR" }
+                }
 
+                Spacer(modifier = Modifier.height(10.dp))
+
+                val toeText = "Front Toe:${"%.2f".format(frontToe ?: 0f)}°"
+                Text(
+                    text = toeText,
+                    fontSize = 28.sp,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.alpha(if (showFrontToe) 1f else 0f)
+                )
+
+                // Level Bubble
+                LevelBubble(
+                    modifier = Modifier.size(150.dp),
+                    bubbleOffsetX = offsetX,
+                    bubbleOffsetY = offsetY
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Rear Wheels
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(120.dp, Alignment.CenterHorizontally)
+                ) {
+                    WheelWithLabel("RL", selectedWheel == "RL") { selectedWheel = "RL" }
+                    WheelWithLabel("RR", selectedWheel == "RR") { selectedWheel = "RR" }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                val rearToeText = "Rear Toe:${"%.2f".format(rearToe ?: 0f)}°"
+                Text(
+                    text = rearToeText,
+                    fontSize = 26.sp,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.alpha(if (showRearToe) 1f else 0f)
+                )
+            }
+
+            ToeControls(
+                isSetEnabled = selectedWheel != null,
+                onSet = {
+                    selectedWheel?.let { wheel ->
+                        wheelYaw[wheel] = yaw
+
+                        if (wheel == "FL" || wheel == "FR") {
+                            showFrontToe = true
+                            val fl = wheelYaw["FL"]
+                            val fr = wheelYaw["FR"]
+                            frontToe = if (fl != null && fr != null)
+                                calculateToeAngle(fl, fr)
+                            else 0f
+                        }
+
+                        if (wheel == "RL" || wheel == "RR") {
+                            showRearToe = true
+                            val rl = wheelYaw["RL"]
+                            val rr = wheelYaw["RR"]
+                            rearToe = if (rl != null && rr != null)
+                                calculateToeAngle(rl, rr)
+                            else 0f
+                        }
+                    }
+                },
+                onRestart = {
+                    wheelYaw.clear()
+                    frontToe = null
+                    showFrontToe = false
+                    rearToe = null
+                    showRearToe = false
+                    selectedWheel = null
+                }
+            )
+        }
+
+        BubbleCenterOverlay(
+            bubbleOffsetX = offsetX,
+            bubbleOffsetY = offsetY
+        )
+    }
+}
+
+// ----------------------------------------------------------
+//  LEVEL BUBBLE CENTER ALERT OVERLAY
+// ----------------------------------------------------------
+@Composable
+fun BubbleCenterOverlay(
+    modifier: Modifier = Modifier,
+    bubbleOffsetX: Float,
+    bubbleOffsetY: Float,
+    centeredThreshold: Float = 0.10f
+) {
+    val distance = sqrt(bubbleOffsetX * bubbleOffsetX + bubbleOffsetY * bubbleOffsetY)
+    val centered = distance < centeredThreshold
+
+    if (!centered) {
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .background(Color.Gray.copy(alpha = 0.5f))
+                // This prevents clicks from passing through
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { },
+            contentAlignment = Alignment.Center
+        ) {
             Text(
-                text = toeText,
+                text = "Wait for the Level Bubble to be near center before clicking \"SET\" the toe value Button.",
+                color = Color.Black,
                 fontSize = 28.sp,
+                fontWeight = FontWeight.Normal,
                 textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.alpha(if (showFrontToe) 1f else 0f)
-            )
-
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            LevelBubble(
-                modifier = Modifier.size(150.dp),
-                bubbleOffsetX = offsetX,
-                bubbleOffsetY = offsetY
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // REAR WHEELS
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(120.dp, Alignment.CenterHorizontally)
-            ) {
-                WheelWithLabel("RL", selectedWheel == "RL") {
-                    selectedWheel = "RL"
-                    wheelYaw["RL"] = yaw
-                    showRearToe = true
-                    rearToe = 0f
-                    wheelYaw["RR"]?.let { rrYaw ->
-                        rearToe = calculateToeAngle(wheelYaw["RL"]!!, rrYaw)
-                    }
-                }
-
-                WheelWithLabel("RR", selectedWheel == "RR") {
-                    selectedWheel = "RR"
-                    wheelYaw["RR"] = yaw
-                    showRearToe = true
-                    rearToe = 0f
-                    wheelYaw["RL"]?.let { rlYaw ->
-                        rearToe = calculateToeAngle(rlYaw, wheelYaw["RR"]!!)
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // REAR TOE DISPLAY (separate from Row – fixes everything)
-            val rearToeText = "Rear Toe:\n${"%.2f".format(rearToe ?: 0f)}°"
-            Text(
-                text = rearToeText,
-                fontSize = 26.sp,
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.alpha(if (showRearToe) 1f else 0f)
+                lineHeight = 36.sp,
+                modifier = Modifier.padding(34.dp)
             )
         }
+    }
+}
 
-        // RESET BUTTON
+
+// ----------------------------------------------------------
+//  TOE BUTTONS SET AND RESTART
+// ----------------------------------------------------------
+@Composable
+fun ToeControls(
+    isSetEnabled: Boolean,
+    onSet: () -> Unit,
+    onRestart: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
         Button(
-            onClick = {
-                wheelYaw.clear()
-                frontToe = null
-                showFrontToe = false
-                rearToe = null
-                showRearToe = false
-                selectedWheel = null
-            },
-            modifier = Modifier.fillMaxWidth(0.8f)
+            onClick = onSet,
+            enabled = isSetEnabled,          // ← greyed out when false
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .height(56.dp)
+        ) {
+            Text("SET", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        }
+
+        Button(
+            onClick = onRestart,
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .height(56.dp)
         ) {
             Text("Restart", fontSize = 18.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
 
-
-
 // ----------------------------------------------------------
-//  LEVEL BUBBLE  (your colored bubble logic included)
+//  LEVEL BUBBLE
 // ----------------------------------------------------------
 @Composable
 fun LevelBubble(
@@ -283,22 +349,25 @@ fun LevelBubble(
         else -> Color.Red
     }
 
-    Canvas(modifier = modifier) {
-        val radius = size.minDimension / 2f
+    Box(contentAlignment = Alignment.Center, modifier = modifier) {
 
-        val r1 = 20.dp.toPx()
-        val r2 = r1 + 10.dp.toPx()
-        val r3 = r1 + 20.dp.toPx()
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val radius = size.minDimension / 2f
 
-        drawCircle(Color.LightGray, r1, Offset(radius, radius), style = Stroke(4f))
-        drawCircle(Color.LightGray, r2, Offset(radius, radius), style = Stroke(4f))
-        drawCircle(Color.LightGray, r3, Offset(radius, radius), style = Stroke(4f))
+            val r1 = 20.dp.toPx()
+            val r2 = r1 + 10.dp.toPx()
+            val r3 = r1 + 20.dp.toPx()
 
-        val dotRadius = 15.dp.toPx()
-        val cx = radius + bubbleOffsetX * radius
-        val cy = radius + bubbleOffsetY * radius
+            drawCircle(Color.LightGray, r1, Offset(radius, radius), style = Stroke(4f))
+            drawCircle(Color.LightGray, r2, Offset(radius, radius), style = Stroke(4f))
+            drawCircle(Color.LightGray, r3, Offset(radius, radius), style = Stroke(4f))
 
-        drawCircle(bubbleColor, dotRadius, Offset(cx, cy))
+            val dotRadius = 15.dp.toPx()
+            val cx = radius + bubbleOffsetX * radius
+            val cy = radius + bubbleOffsetY * radius
+
+            drawCircle(bubbleColor, dotRadius, Offset(cx, cy))
+        }
     }
 }
 
@@ -307,20 +376,21 @@ fun LevelBubble(
 // ----------------------------------------------------------
 @Composable
 fun WheelWithLabel(label: String, isSelected: Boolean, onClick: () -> Unit) {
-    val background = if (isSelected) Color(0xFF90CAF9) else Color.LightGray
-
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(label, fontWeight = FontWeight.Bold, color = Color.Black)
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Box(
-            modifier = Modifier
-                .width(60.dp)
-                .height(100.dp)
-                .background(background, RoundedCornerShape(12.dp))
-                .clickable { onClick() },
-            contentAlignment = Alignment.Center
-        ) {}
+    val wheelBackground = if (isSelected) Color(0xFF90CAF9) else Color.LightGray
+    val textColor = MaterialTheme.colorScheme.background
+    Box(
+        modifier = Modifier
+            .width(60.dp)
+            .height(100.dp)
+            .background(wheelBackground, RoundedCornerShape(12.dp))
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = label,
+            fontWeight = FontWeight.Bold,
+            color = textColor, // <-- text is invisible unless background changes
+            fontSize = 20.sp
+        )
     }
 }
