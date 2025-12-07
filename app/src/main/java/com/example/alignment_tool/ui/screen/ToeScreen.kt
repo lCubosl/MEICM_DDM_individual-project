@@ -218,8 +218,17 @@ fun ToeScreen() {
                     }
                 },
                 onSave = {
-                    // TODO: Implement save to endpoint
-                    println("Saving all wheel data: $wheelDisplay, FrontToe=$frontToe, RearToe=$rearToe")
+                    saveAllToes(
+                        wheelValues = wheelDisplay,
+                        frontToe = frontToe,
+                        rearToe = rearToe
+                    )
+                    // Clear temporary state after saving
+                    wheelYaw.clear()
+                    wheelDisplay.clear()
+                    frontToe = null
+                    rearToe = null
+                    selectedWheel = null
                 },
                 onRestart = {
                     wheelYaw.clear()
@@ -294,58 +303,74 @@ fun ToeControlsWithSave(
     onSave: () -> Unit,
     onRestart: () -> Unit
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(6.dp)
-    ) {
-        if (!allWheelsSet) {
-            // Regular single SET button
-            Button(
-                onClick = onSet,
-                enabled = isSetEnabled,
-                modifier = Modifier
-                    .fillMaxWidth(0.8f)
-                    .height(56.dp)
-            ) {
-                Text("SET", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            }
-        } else {
-            // Split into SET + SAVE
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(0.8f)
-                    .height(56.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+    var showConfirmDialog by remember { mutableStateOf(false) }
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        if (allWheelsSet) {
+            // Row with SET + SAVE buttons
+            Row(modifier = Modifier.fillMaxWidth(0.8f), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                // SET button - 2/3 width
                 Button(
                     onClick = onSet,
-                    modifier = Modifier.height(56.dp).weight(2f) // 2/3 width
+                    enabled = isSetEnabled,
+                    modifier = Modifier.weight(2f).height(56.dp)
                 ) {
                     Text("SET", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 }
 
+                // SAVE button - 1/3 width, green
                 Button(
-                    onClick = onSave,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)), // Green
-                    modifier = Modifier.height(56.dp).weight(1f) // 1/3 width
+                    onClick = { showConfirmDialog = true },
+                    modifier = Modifier.weight(1f).height(56.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
                 ) {
-                    Text("SAVE", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Text("SAVE", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 }
+            }
+        } else {
+            // Only SET button
+            Button(
+                onClick = onSet,
+                enabled = isSetEnabled,
+                modifier = Modifier.fillMaxWidth(0.8f).height(56.dp)
+            ) {
+                Text("SET", fontSize = 18.sp, fontWeight = FontWeight.Bold)
             }
         }
 
-        // Restart button (always below)
+        // Restart button below
         Button(
             onClick = onRestart,
-            modifier = Modifier
-                .fillMaxWidth(0.8f)
-                .height(56.dp)
+            modifier = Modifier.fillMaxWidth(0.8f).height(56.dp)
         ) {
             Text("Restart", fontSize = 18.sp, fontWeight = FontWeight.Bold)
         }
     }
-}
 
+    // Confirmation dialog
+    if (showConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showConfirmDialog = false },
+            title = { Text("Save All Toe Values?") },
+            text = { Text("Are you sure you want to save all current toe measurements?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onSave()  // call the save logic
+                        showConfirmDialog = false
+                    }
+                ) {
+                    Text("Yes", color = Color.Black)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showConfirmDialog = false }) {
+                    Text("No", color = Color.Black)
+                }
+            }
+        )
+    }
+}
 
 // ----------------------------------------------------------
 //  LEVEL BUBBLE
@@ -415,4 +440,13 @@ fun calculateToeAngle(left: Float, right: Float, invert: Boolean = false): Float
     var delta = ((right - left + 540) % 360) - 180
     if (invert) delta *= -1   // Use for front wheels
     return delta
+}
+
+fun saveAllToes(
+    wheelValues: Map<String, Float?>,
+    frontToe: Float?,
+    rearToe: Float?
+) {
+    // TODO: SAVE VALUES TO DB / endpoint
+    println("Saving all wheel values: $wheelValues, FrontToe=$frontToe, RearToe=$rearToe")
 }
