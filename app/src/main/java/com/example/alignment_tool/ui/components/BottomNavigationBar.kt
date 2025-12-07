@@ -9,7 +9,7 @@ import com.example.alignment_tool.navigation.Screen
 
 @Composable
 fun BottomNavigationBar(navController: NavHostController) {
-    val items = listOf(Screen.Toe, Screen.Camber, Screen.Caster)
+    val items = listOf(Screen.Toe, Screen.Camber, Screen.Caster, Screen.Settings)
     NavigationBar {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route

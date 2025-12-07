@@ -8,11 +8,13 @@ import com.example.alignment_tool.ui.screen.CamberScreen
 import com.example.alignment_tool.ui.screen.ToeScreen
 import androidx.compose.ui.Modifier
 import com.example.alignment_tool.ui.screen.CasterScreen
+import com.example.alignment_tool.ui.screen.SettingsScreen
 
 sealed class Screen(val route: String, val title: String) {
     object Toe : Screen("toe", "Toe")
     object Camber : Screen("camber", "Camber")
     object Caster : Screen("caster", "Caster")
+    object Settings : Screen("settings", "Settings")
 }
 
 @Composable
@@ -25,5 +27,6 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
         composable(Screen.Toe.route) { ToeScreen() }
         composable(Screen.Camber.route) { CamberScreen() }
         composable(Screen.Caster.route) { CasterScreen() }
+        composable(Screen.Settings.route) { SettingsScreen() }
     }
 }

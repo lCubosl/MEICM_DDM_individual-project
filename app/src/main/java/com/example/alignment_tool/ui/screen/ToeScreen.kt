@@ -238,7 +238,6 @@ fun ToeScreen() {
                     selectedWheel = null
                 }
             )
-
         }
 
         BubbleCenterOverlay(bubbleOffsetX = offsetX, bubbleOffsetY = offsetY)
