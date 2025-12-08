@@ -9,27 +9,34 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.alignment_tool.data.db.CamberMeasurement
 import com.example.alignment_tool.data.db.ToeMeasurement
+import com.example.alignment_tool.data.repository.CamberRepository
 import com.example.alignment_tool.data.repository.ToeRepository
+import com.example.alignment_tool.data.viewmodel.CamberViewModel
+import com.example.alignment_tool.data.viewmodel.CamberViewModelFactory
 import com.example.alignment_tool.data.viewmodel.ToeViewModel
 import com.example.alignment_tool.data.viewmodel.ToeViewModelFactory
-import kotlinx.coroutines.flow.collectLatest
 
 @Composable
-fun SavedValuesScreen(repo: ToeRepository) {
+fun SavedValuesScreen(
+    repoToe: ToeRepository,
+    repoCamber: CamberRepository
+) {
 
-    // Get ViewModel WITH factory (needed because your ViewModel has constructor args)
-    val viewModel: ToeViewModel = viewModel(factory = ToeViewModelFactory(repo))
+    // Toe ViewModel with factory
+    val toeViewModel: ToeViewModel = viewModel(factory = ToeViewModelFactory(repoToe))
+    val camberViewModel: CamberViewModel = viewModel (factory = CamberViewModelFactory(repoCamber))
 
-    // Collect the Flow<List<ToeMeasurement>>
-    val measurements by viewModel.allMeasurements.collectAsState(initial = emptyList())
+    // Collect flows
+    val toeMeasurements by toeViewModel.allMeasurements.collectAsState(initial = emptyList())
+    val camberMeasurements by camberViewModel.allMeasurements.collectAsState(initial = emptyList())
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-
         Text(
             text = "Saved Alignments",
             style = MaterialTheme.typography.headlineMedium
@@ -37,19 +44,36 @@ fun SavedValuesScreen(repo: ToeRepository) {
 
         Spacer(Modifier.height(16.dp))
 
-        if (measurements.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("No Saved Measurements")
-            }
+        // ----- Toe Measurements -----
+        Text("Toe Measurements", style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(8.dp))
+        if (toeMeasurements.isEmpty()) {
+            Text("No Toe Measurements saved")
         } else {
             LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.weight(1f)
             ) {
-                items(measurements) { item ->
+                items(toeMeasurements) { item ->
                     MeasurementCard(item)
+                }
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        // ----- Camber Measurements -----
+        Text("Camber Measurements", style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(8.dp))
+        if (camberMeasurements.isEmpty()) {
+            Text("No Camber Measurements saved")
+        } else {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.weight(1f)
+            ) {
+                items(camberMeasurements) { item ->
+                    CamberMeasurementCard(item)
                 }
             }
         }
@@ -70,6 +94,22 @@ fun MeasurementCard(item: ToeMeasurement) {
             Text("RR: ${item.rrAngle}")
             Text("Front Toe: ${item.fToe}")
             Text("Rear Toe: ${item.rToe}")
+        }
+    }
+}
+
+@Composable
+fun CamberMeasurementCard(item: CamberMeasurement) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text("Date: ${item.date}")
+            Text("FL Camber: ${item.flCamber}")
+            Text("FR Camber: ${item.frCamber}")
+            Text("RL Camber: ${item.rlCamber}")
+            Text("RR Camber: ${item.rrCamber}")
         }
     }
 }

@@ -31,9 +31,10 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.rememberTextMeasurer
+import com.example.alignment_tool.data.viewmodel.CamberViewModel
 
 @Composable
-fun CamberScreen() {
+fun CamberScreen(viewModel: CamberViewModel) {
     var selectedWheel by remember { mutableStateOf("FL") }
     val tilt by rememberTilt(context = LocalContext.current)
     val orientation = rememberOrientationAngles(context = LocalContext.current)
@@ -62,11 +63,15 @@ fun CamberScreen() {
             confirmButton = {
                 TextButton(
                     onClick = {
-                        saveAllCambers(savedCambers)
-                        // Reset camber values after saving
-                        savedCambers.keys.forEach { key ->
-                            savedCambers[key] = null
-                        }
+                        // SAVE using the ViewModel
+                        viewModel.saveMeasurement(
+                            fl = savedCambers["FL"],
+                            fr = savedCambers["FR"],
+                            rl = savedCambers["RL"],
+                            rr = savedCambers["RR"]
+                        )
+                        // Clear after saving
+                        savedCambers.keys.forEach { key -> savedCambers[key] = null }
                         showConfirmDialog = false
                     }
                 ) {
@@ -175,15 +180,9 @@ fun CamberScreen() {
                         containerColor = if (allWheelsSaved) Color(0xFF4CAF50) else MaterialTheme.colorScheme.primary
                     )
                 ) {
-                    Text(
-                        text = if (allWheelsSaved) "Save All" else "Save",
-                        color = Color.White
-                    )
+                    Text(if (allWheelsSaved) "Save All" else "Save", color = Color.White)
                 }
 
-
-
-                // RESET WHEEL CAMBER BUTTON
                 Button(
                     onClick = { savedCambers[selectedWheel] = null },
                     enabled = savedCambers[selectedWheel] != null,
@@ -191,8 +190,6 @@ fun CamberScreen() {
                 ) {
                     Text("Reset")
                 }
-
-
             }
 
         }

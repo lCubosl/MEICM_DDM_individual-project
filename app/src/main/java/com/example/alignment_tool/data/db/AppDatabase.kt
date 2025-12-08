@@ -5,9 +5,13 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [ToeMeasurement::class], version = 1)
+@Database(
+    entities = [ToeMeasurement::class, CamberMeasurement::class],
+    version = 1
+)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun toeDao(): ToeDao
+    abstract fun camberDao(): CamberDao
 
     companion object {
         @Volatile
@@ -18,7 +22,7 @@ abstract class AppDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "alignment_database"
+                    "alignment_db"
                 ).build()
                 INSTANCE = instance
                 instance
@@ -26,3 +30,4 @@ abstract class AppDatabase : RoomDatabase() {
         }
     }
 }
+

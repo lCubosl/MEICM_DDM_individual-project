@@ -10,10 +10,12 @@ import com.example.alignment_tool.ui.screen.CamberScreen
 import com.example.alignment_tool.ui.screen.ToeScreen
 import com.example.alignment_tool.ui.screen.SavedValuesScreen
 import androidx.compose.ui.Modifier
+import com.example.alignment_tool.data.repository.CamberRepository
 import com.example.alignment_tool.ui.screen.SettingsScreen
-import com.example.alignment_tool.ui.theme.ThemeViewModel
+import com.example.alignment_tool.data.viewmodel.ThemeViewModel
 import com.example.alignment_tool.data.viewmodel.ToeViewModel
 import com.example.alignment_tool.data.repository.ToeRepository
+import com.example.alignment_tool.data.viewmodel.CamberViewModel
 
 sealed class Screen(val route: String, val title: String) {
     object Toe : Screen("toe", "Toe")
@@ -28,7 +30,9 @@ fun NavGraph(
     modifier: Modifier = Modifier,
     themeViewModel: ThemeViewModel,
     toeViewModel: ToeViewModel,
-    toeRepository: ToeRepository           // <-- NEW
+    toeRepository: ToeRepository,
+    camberViewModel: CamberViewModel,
+    camberRepository: CamberRepository
 ) {
     NavHost(
         navController = navController,
@@ -41,11 +45,11 @@ fun NavGraph(
         }
 
         composable(Screen.Camber.route) {
-            CamberScreen()
+            CamberScreen(viewModel = camberViewModel)
         }
 
         composable(Screen.SavedValues.route) {
-            SavedValuesScreen(repo = toeRepository)   // <-- FIXED
+            SavedValuesScreen(repoToe = toeRepository, repoCamber= camberRepository)
         }
 
         composable(Screen.Settings.route) {

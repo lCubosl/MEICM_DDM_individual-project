@@ -14,14 +14,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.rememberNavController
 import com.example.alignment_tool.navigation.NavGraph
 import com.example.alignment_tool.ui.components.BottomNavigationBar
-import com.example.alignment_tool.ui.theme.ThemeViewModel
-import com.example.alignment_tool.ui.theme.ThemeRepository
+import com.example.alignment_tool.data.viewmodel.ThemeViewModel
+import com.example.alignment_tool.data.repository.ThemeRepository
 import com.example.alignment_tool.ui.screen.AppTheme
 import com.example.alignment_tool.data.db.AppDatabase
 import com.example.alignment_tool.data.repository.ToeRepository
 import com.example.alignment_tool.data.viewmodel.ToeViewModel
 import com.example.alignment_tool.data.viewmodel.ToeViewModelFactory
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.alignment_tool.data.repository.CamberRepository
+import com.example.alignment_tool.data.viewmodel.CamberViewModel
+import com.example.alignment_tool.data.viewmodel.CamberViewModelFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,9 +46,13 @@ class MainActivity : ComponentActivity() {
             val context = LocalContext.current
             val db = remember { AppDatabase.getDatabase(context) }
             val toeRepo = remember { ToeRepository(db.toeDao()) }
+            val camberRepo = remember { CamberRepository(db.camberDao()) }
 
             val toeVM: ToeViewModel = viewModel(
                 factory = ToeViewModelFactory(toeRepo)
+            )
+            val camberVM: CamberViewModel = viewModel(
+                factory = CamberViewModelFactory(camberRepo)
             )
 
             MaterialTheme(colorScheme = colorScheme) {
@@ -60,7 +67,9 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding),
                         themeViewModel = themeVM,
                         toeViewModel = toeVM,
-                        toeRepository = toeRepo
+                        toeRepository = toeRepo,
+                        camberViewModel = camberVM,
+                        camberRepository = camberRepo
                     )
                 }
             }
