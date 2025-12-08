@@ -1,10 +1,10 @@
 package com.example.alignment_tool.ui.theme
 
-import AppTheme
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.example.alignment_tool.ui.screen.AppTheme
 import kotlinx.coroutines.flow.map
 
 // DataStore delegate

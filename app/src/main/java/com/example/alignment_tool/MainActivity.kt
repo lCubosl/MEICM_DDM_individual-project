@@ -4,53 +4,66 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.Scaffold
-import androidx.navigation.compose.rememberNavController
-import com.example.alignment_tool.navigation.NavGraph
-import com.example.alignment_tool.ui.components.BottomNavigationBar
-import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.*
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.compose.rememberNavController
+import com.example.alignment_tool.navigation.NavGraph
+import com.example.alignment_tool.ui.components.BottomNavigationBar
 import com.example.alignment_tool.ui.theme.ThemeViewModel
 import com.example.alignment_tool.ui.theme.ThemeRepository
+import com.example.alignment_tool.ui.screen.AppTheme
+import com.example.alignment_tool.data.db.AppDatabase
+import com.example.alignment_tool.data.repository.ToeRepository
+import com.example.alignment_tool.data.viewmodel.ToeViewModel
+import com.example.alignment_tool.data.viewmodel.ToeViewModelFactory
 import androidx.lifecycle.viewmodel.compose.viewModel
-
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            // Step 1: Create repository and ViewModel
-            val repo = ThemeRepository(applicationContext)
-            val vm = remember { ThemeViewModel(repo) }
 
-            // Step 2: Collect current theme
-            val theme by vm.currentTheme.collectAsState()
+            // THEME VIEWMODEL
+            val themeRepo = ThemeRepository(applicationContext)
+            val themeVM = remember { ThemeViewModel(themeRepo) }
+            val theme by themeVM.currentTheme.collectAsState()
 
-            // Step 3: Set color scheme based on theme
             val colorScheme = when (theme) {
                 AppTheme.LIGHT -> lightColorScheme()
                 AppTheme.DARK -> darkColorScheme()
                 AppTheme.SYSTEM -> if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
             }
 
+            // TOE VIEWMODEL (with DB)
+            val context = LocalContext.current
+            val db = remember { AppDatabase.getDatabase(context) }
+            val toeRepo = remember { ToeRepository(db.toeDao()) }
+
+            val toeVM: ToeViewModel = viewModel(
+                factory = ToeViewModelFactory(toeRepo)
+            )
+
             MaterialTheme(colorScheme = colorScheme) {
+
                 val navController = rememberNavController()
 
-                Scaffold(bottomBar = { BottomNavigationBar(navController) }) { innerPadding ->
+                Scaffold(
+                    bottomBar = { BottomNavigationBar(navController) }
+                ) { innerPadding ->
                     NavGraph(
                         navController = navController,
                         modifier = Modifier.padding(innerPadding),
-                        themeViewModel = vm
+                        themeViewModel = themeVM,
+                        toeViewModel = toeVM,
+                        toeRepository = toeRepo
                     )
                 }
             }
         }
     }
 }
-

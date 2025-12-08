@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import kotlin.math.sqrt
 import androidx.compose.ui.graphics.drawscope.Stroke
+import com.example.alignment_tool.data.viewmodel.ToeViewModel
 
 // ----------------------------------------------------------
 // REMEMBER PHONE YAW (heading) using the Rotation Vector sensor
@@ -115,7 +116,7 @@ fun rememberTilt(context: Context): State<Pair<Float, Float>> {
 //  MAIN TOE SCREEN
 // ----------------------------------------------------------
 @Composable
-fun ToeScreen() {
+fun ToeScreen(viewModel: ToeViewModel) {
     val context = LocalContext.current
     val yaw = rememberYaw(context).value
     val tilt = rememberTilt(context).value
@@ -218,12 +219,15 @@ fun ToeScreen() {
                     }
                 },
                 onSave = {
-                    saveAllToes(
-                        wheelValues = wheelDisplay,
-                        frontToe = frontToe,
-                        rearToe = rearToe
+                    viewModel.saveMeasurement(
+                        flAngle = wheelDisplay["FL"],
+                        frAngle = wheelDisplay["FR"],
+                        rlAngle = wheelDisplay["RL"],
+                        rrAngle = wheelDisplay["RR"],
+                        fToe = frontToe,
+                        rToe = rearToe
                     )
-                    // Clear temporary state after saving
+
                     wheelYaw.clear()
                     wheelDisplay.clear()
                     frontToe = null
@@ -439,13 +443,4 @@ fun calculateToeAngle(left: Float, right: Float, invert: Boolean = false): Float
     var delta = ((right - left + 540) % 360) - 180
     if (invert) delta *= -1   // Use for front wheels
     return delta
-}
-
-fun saveAllToes(
-    wheelValues: Map<String, Float?>,
-    frontToe: Float?,
-    rearToe: Float?
-) {
-    // TODO: SAVE VALUES TO DB / endpoint
-    println("Saving all wheel values: $wheelValues, FrontToe=$frontToe, RearToe=$rearToe")
 }

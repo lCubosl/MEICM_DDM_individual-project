@@ -1,8 +1,8 @@
 package com.example.alignment_tool.ui.theme
 
-import AppTheme
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.alignment_tool.ui.screen.AppTheme
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
