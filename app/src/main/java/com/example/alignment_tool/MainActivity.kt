@@ -22,19 +22,41 @@ import com.example.alignment_tool.data.repository.ToeRepository
 import com.example.alignment_tool.data.viewmodel.ToeViewModel
 import com.example.alignment_tool.data.viewmodel.ToeViewModelFactory
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.alignment_tool.data.datastore.CarPreferences
+import com.example.alignment_tool.data.remote.CarApiClient
 import com.example.alignment_tool.data.repository.CamberRepository
+import com.example.alignment_tool.data.repository.CarRepository
 import com.example.alignment_tool.data.viewmodel.CamberViewModel
 import com.example.alignment_tool.data.viewmodel.CamberViewModelFactory
+import com.example.alignment_tool.data.viewmodel.CarViewModel
+import com.example.alignment_tool.data.viewmodel.CarViewModelFactory
+import com.example.alignment_tool.data.viewmodel.ThemeViewModelFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
 
+            // FOR THE LOVE OF GOD THIS SHOULD GO A .ENV
+            val api = CarApiClient.createService(
+                apiKey = "21334d2c-b7cb-498e-9402-e115645ecf23",
+                apiSecret = "6235b270ef22d10e211808bfdff7b76e"
+            )
+
+            // CAR API
+            val carRepo = CarRepository(api)
+            val carPrefs = CarPreferences(this)
+            val carVM: CarViewModel = viewModel(
+                factory = CarViewModelFactory(carRepo, carPrefs)
+            )
+
             // THEME VIEWMODEL
             val themeRepo = ThemeRepository(applicationContext)
-            val themeVM = remember { ThemeViewModel(themeRepo) }
+            val themeVM: ThemeViewModel = viewModel(
+                factory = ThemeViewModelFactory(themeRepo)
+            )
             val theme by themeVM.currentTheme.collectAsState()
+
 
             val colorScheme = when (theme) {
                 AppTheme.LIGHT -> lightColorScheme()
@@ -69,7 +91,8 @@ class MainActivity : ComponentActivity() {
                         toeViewModel = toeVM,
                         toeRepository = toeRepo,
                         camberViewModel = camberVM,
-                        camberRepository = camberRepo
+                        camberRepository = camberRepo, // <--- THIS WAS MISSING
+                        carViewModel = carVM
                     )
                 }
             }

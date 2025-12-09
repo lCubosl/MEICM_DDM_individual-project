@@ -16,6 +16,7 @@ import com.example.alignment_tool.data.viewmodel.ThemeViewModel
 import com.example.alignment_tool.data.viewmodel.ToeViewModel
 import com.example.alignment_tool.data.repository.ToeRepository
 import com.example.alignment_tool.data.viewmodel.CamberViewModel
+import com.example.alignment_tool.data.viewmodel.CarViewModel
 
 sealed class Screen(val route: String, val title: String) {
     object Toe : Screen("toe", "Toe")
@@ -32,7 +33,8 @@ fun NavGraph(
     toeViewModel: ToeViewModel,
     toeRepository: ToeRepository,
     camberViewModel: CamberViewModel,
-    camberRepository: CamberRepository
+    camberRepository: CamberRepository,
+    carViewModel: CarViewModel
 ) {
     NavHost(
         navController = navController,
@@ -54,9 +56,11 @@ fun NavGraph(
 
         composable(Screen.Settings.route) {
             val theme by themeViewModel.currentTheme.collectAsState()
+
             SettingsScreen(
                 currentTheme = theme,
-                onThemeSelected = { themeViewModel.selectTheme(it) }
+                onThemeSelected = { themeViewModel.selectTheme(it) },
+                carViewModel = carViewModel
             )
         }
     }
