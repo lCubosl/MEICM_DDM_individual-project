@@ -5,6 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,76 +30,16 @@ fun SettingsScreen(
     onThemeSelected: (AppTheme) -> Unit,
     carViewModel: CarViewModel
 ) {
-    val makes by carViewModel.makes.collectAsState(initial = emptyList())
-    val models by carViewModel.models.collectAsState(initial = emptyList())
-
-    var expandedMake by remember { mutableStateOf(false) }
-    var expandedModel by remember { mutableStateOf(false) }
-
-    val selectedMake by carViewModel.selectedMake.collectAsState()
-    val selectedModel by carViewModel.selectedModel.collectAsState()
-
     LaunchedEffect(Unit) {
         carViewModel.loadMakes()
     }
 
     Column(modifier = Modifier.padding(16.dp)) {
+        Text("Settings", style = MaterialTheme.typography.headlineSmall)
 
-        Text("Select Car", style = MaterialTheme.typography.headlineSmall)
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(24.dp))
 
-        // ---- Make Dropdown
-        Box {
-            OutlinedButton(onClick = { expandedMake = true }) {
-                Text(selectedMake?.name ?: "Select Make")
-            }
-            DropdownMenu(expanded = expandedMake, onDismissRequest = { expandedMake = false }) {
-                makes.forEach { make ->
-                    DropdownMenuItem(
-                        text = { Text(make.name) },
-                        onClick = {
-                            carViewModel.selectMake(make)
-                            expandedMake = false
-                        }
-                    )
-                }
-            }
-        }
-
-        Spacer(Modifier.height(12.dp))
-
-        // ---- Model Dropdown
-        Box {
-            OutlinedButton(
-                onClick = { if (models.isNotEmpty()) expandedModel = true },
-                enabled = selectedMake != null
-            ) {
-                Text(selectedModel?.name ?: "Select Model")
-            }
-            DropdownMenu(expanded = expandedModel, onDismissRequest = { expandedModel = false }) {
-                models.forEach { model ->
-                    DropdownMenuItem(
-                        text = { Text(model.name) },
-                        onClick = {
-                            carViewModel.selectModel(model)
-                            expandedModel = false
-                        }
-                    )
-                }
-            }
-        }
-
-        Spacer(Modifier.height(16.dp))
-
-        Button(
-            onClick = { carViewModel.saveCarSelection() },
-            enabled = selectedMake != null && selectedModel != null
-        ) {
-            Text("Save Car")
-        }
-
-        Spacer(Modifier.height(32.dp))
-
+        // THEME SELCTOR WITH COMPOSABLE THEMESEGMENTEDCONTROL
         Text("Select your theme:", fontSize = 16.sp)
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -105,6 +47,11 @@ fun SettingsScreen(
             selected = currentTheme,
             onSelect = onThemeSelected
         )
+
+        Spacer(Modifier.height(24.dp))
+
+        // THEME SELCTOR WITH COMPOSABLE CARSELECTOR
+        CarSelector(carViewModel)
     }
 }
 
@@ -183,6 +130,104 @@ fun ThemeSegmentedControl(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun CarSelector(carViewModel: CarViewModel) {
+    val makes by carViewModel.makes.collectAsState()
+    val models by carViewModel.models.collectAsState()
+    val selectedMake by carViewModel.selectedMake.collectAsState()
+    val selectedModel by carViewModel.selectedModel.collectAsState()
+
+    var expandedMake by remember { mutableStateOf(false) }
+    var expandedModel by remember { mutableStateOf(false) }
+
+    // Title
+    Text("Select your vehicle:", fontSize = 16.sp)
+
+    Spacer(Modifier.height(16.dp))
+
+    // Buttons Row
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+
+        // MAKE BUTTON
+        OutlinedButton(
+            onClick = { expandedMake = true },
+            modifier = Modifier.weight(1f)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(selectedMake?.name ?: "Make")
+                Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+            }
+        }
+
+        // MODEL BUTTON
+        OutlinedButton(
+            onClick = { if (models.isNotEmpty()) expandedModel = true },
+            enabled = selectedMake != null,
+            modifier = Modifier.weight(1f)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(selectedModel?.name ?: "Model")
+                Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+            }
+        }
+
+        // SAVE CAR BUTTON
+        Button(
+            onClick = { carViewModel.saveCarSelection() },
+            enabled = selectedMake != null && selectedModel != null
+        ) {
+            Text("Save Car")
+        }
+    }
+
+    // MAKE DROPDOWN
+    DropdownMenu(
+        expanded = expandedMake,
+        onDismissRequest = { expandedMake = false },
+        modifier = Modifier
+            .width(200.dp)
+            .heightIn(max = 250.dp)
+    ) {
+        makes.forEach { make ->
+            DropdownMenuItem(
+                text = { Text(make.name) },
+                onClick = {
+                    carViewModel.selectMake(make)
+                    expandedMake = false
+                }
+            )
+        }
+    }
+
+    // MODEL DROPDOWN
+    DropdownMenu(
+        expanded = expandedModel,
+        onDismissRequest = { expandedModel = false },
+        modifier = Modifier
+            .width(200.dp)
+            .heightIn(max = 250.dp)
+    ) {
+        models.forEach { model ->
+            DropdownMenuItem(
+                text = { Text(model.name) },
+                onClick = {
+                    carViewModel.selectModel(model)
+                    expandedModel = false
+                }
+            )
         }
     }
 }
