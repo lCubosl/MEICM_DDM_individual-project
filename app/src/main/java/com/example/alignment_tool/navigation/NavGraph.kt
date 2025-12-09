@@ -10,6 +10,7 @@ import com.example.alignment_tool.ui.screen.CamberScreen
 import com.example.alignment_tool.ui.screen.ToeScreen
 import com.example.alignment_tool.ui.screen.SavedValuesScreen
 import androidx.compose.ui.Modifier
+import com.example.alignment_tool.data.model.ThemeOption
 import com.example.alignment_tool.data.repository.CamberRepository
 import com.example.alignment_tool.ui.screen.SettingsScreen
 import com.example.alignment_tool.data.viewmodel.ThemeViewModel
@@ -55,13 +56,14 @@ fun NavGraph(
         }
 
         composable(Screen.Settings.route) {
-            val theme by themeViewModel.currentTheme.collectAsState()
+            val theme by themeViewModel.currentTheme.collectAsState(initial = ThemeOption.SYSTEM)
 
             SettingsScreen(
                 currentTheme = theme,
-                onThemeSelected = { themeViewModel.selectTheme(it) },
+                onThemeSelected = { themeViewModel.setTheme(it) },
                 carViewModel = carViewModel
             )
         }
+
     }
 }

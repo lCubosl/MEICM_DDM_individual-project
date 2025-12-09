@@ -20,16 +20,13 @@ import androidx.compose.ui.unit.sp
 import com.example.alignment_tool.data.viewmodel.CarViewModel
 import com.example.alignment_tool.data.model.ThemeOption
 
-enum class AppTheme {
-    LIGHT, DARK, SYSTEM
-}
-
 @Composable
 fun SettingsScreen(
-    currentTheme: AppTheme,
-    onThemeSelected: (AppTheme) -> Unit,
+    currentTheme: ThemeOption,
+    onThemeSelected: (ThemeOption) -> Unit,
     carViewModel: CarViewModel
 ) {
+    // launches CarAPI with key and loads "makes/v2"
     LaunchedEffect(Unit) {
         carViewModel.loadMakes()
     }
@@ -39,10 +36,7 @@ fun SettingsScreen(
 
         Spacer(Modifier.height(24.dp))
 
-        // THEME SELCTOR WITH COMPOSABLE THEMESEGMENTEDCONTROL
-        Text("Select your theme:", fontSize = 16.sp)
-        Spacer(modifier = Modifier.height(16.dp))
-
+        // set theme buttons
         ThemeSegmentedControl(
             selected = currentTheme,
             onSelect = onThemeSelected
@@ -50,20 +44,23 @@ fun SettingsScreen(
 
         Spacer(Modifier.height(24.dp))
 
-        // THEME SELCTOR WITH COMPOSABLE CARSELECTOR
+        // car make and model buttons
         CarSelector(carViewModel)
     }
 }
 
+// ----------------------------------------------------------
+//  THEME BUTTONS SLEECTOR
+// ----------------------------------------------------------
 @Composable
 fun ThemeSegmentedControl(
-    selected: AppTheme,
-    onSelect: (AppTheme) -> Unit
+    selected: ThemeOption,
+    onSelect: (ThemeOption) -> Unit
 ) {
     val options = listOf(
-        AppTheme.LIGHT to "Light",
-        AppTheme.DARK to "Dark",
-        AppTheme.SYSTEM to "System"
+        ThemeOption.LIGHT to "Light",
+        ThemeOption.DARK to "Dark",
+        ThemeOption.SYSTEM to "System"
     )
 
     val selectedIndex = options.indexOfFirst { it.first == selected }
@@ -82,6 +79,9 @@ fun ThemeSegmentedControl(
         targetValue = targetOffset,
         label = ""
     )
+
+    Text("Select your theme:", fontSize = 16.sp)
+    Spacer(modifier = Modifier.height(16.dp))
 
     Box(
         modifier = Modifier

@@ -1,31 +1,29 @@
-package com.example.alignment_tool.data.repository
+package com.example.alignment_tool.data.datastore
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.example.alignment_tool.ui.screen.AppTheme
+import com.example.alignment_tool.data.model.ThemeOption
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-// DataStore delegate
-val Context.themeDataStore by preferencesDataStore("settings")
+private val Context.dataStore by preferencesDataStore(name = "theme_prefs")
 
-class ThemeRepository(private val context: Context) {
+class ThemeDataStore(private val context: Context) {
 
     companion object {
-        val THEME_KEY = stringPreferencesKey("app_theme")
+        private val THEME_KEY = stringPreferencesKey("selected_theme")
     }
 
-    // Flow to observe the saved theme
-    val themeFlow = context.themeDataStore.data.map { prefs ->
-        val savedName = prefs[THEME_KEY]
-        savedName?.let { AppTheme.valueOf(it) } ?: AppTheme.SYSTEM
+    val themeFlow: Flow<ThemeOption> = context.dataStore.data.map { prefs ->
+        val saved = prefs[THEME_KEY]
+        ThemeOption.values().find { it.name == saved } ?: ThemeOption.SYSTEM
     }
 
-    // Save theme
-    suspend fun saveTheme(theme: AppTheme) {
-        context.themeDataStore.edit { prefs ->
-            prefs[THEME_KEY] = theme.name
+    suspend fun saveTheme(option: ThemeOption) {
+        context.dataStore.edit { prefs ->
+            prefs[THEME_KEY] = option.name
         }
     }
 }

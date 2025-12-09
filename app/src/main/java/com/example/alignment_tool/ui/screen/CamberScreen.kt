@@ -339,7 +339,7 @@ fun rememberOrientationAngles(context: Context): State<Triple<Float, Float, Floa
 
 @Composable
 fun SmallWheel(
-    label: String,              // <-- NEW: FL, FR, RL, RR
+    label: String,
     isSelected: Boolean,
     savedCamber: Float?,
     onClick: () -> Unit
@@ -377,9 +377,4 @@ fun SmallWheel(
             }
         }
     }
-}
-
-fun saveAllCambers(cambers: Map<String, Float?>) {
-    // TODO: SAVE VALUES TO DB
-    println("Saving all camber values: $cambers")
 }

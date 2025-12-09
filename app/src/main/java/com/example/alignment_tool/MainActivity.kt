@@ -1,5 +1,6 @@
 package com.example.alignment_tool
 
+import com.example.alignment_tool.data.model.ThemeOption
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,7 +17,6 @@ import com.example.alignment_tool.navigation.NavGraph
 import com.example.alignment_tool.ui.components.BottomNavigationBar
 import com.example.alignment_tool.data.viewmodel.ThemeViewModel
 import com.example.alignment_tool.data.repository.ThemeRepository
-import com.example.alignment_tool.ui.screen.AppTheme
 import com.example.alignment_tool.data.db.AppDatabase
 import com.example.alignment_tool.data.repository.ToeRepository
 import com.example.alignment_tool.data.viewmodel.ToeViewModel
@@ -52,16 +52,15 @@ class MainActivity : ComponentActivity() {
 
             // THEME VIEWMODEL
             val themeRepo = ThemeRepository(applicationContext)
-            val themeVM: ThemeViewModel = viewModel(
-                factory = ThemeViewModelFactory(themeRepo)
-            )
-            val theme by themeVM.currentTheme.collectAsState()
+            val themeVM: ThemeViewModel = viewModel(factory = ThemeViewModelFactory(themeRepo))
 
+            val theme by themeVM.currentTheme.collectAsState(initial = ThemeOption.SYSTEM)
 
             val colorScheme = when (theme) {
-                AppTheme.LIGHT -> lightColorScheme()
-                AppTheme.DARK -> darkColorScheme()
-                AppTheme.SYSTEM -> if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
+                ThemeOption.LIGHT -> lightColorScheme()
+                ThemeOption.DARK -> darkColorScheme()
+                ThemeOption.SYSTEM ->
+                    if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
             }
 
             // TOE VIEWMODEL (with DB)
