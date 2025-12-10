@@ -18,7 +18,7 @@ class ThemeDataStore(private val context: Context) {
 
     val themeFlow: Flow<ThemeOption> = context.dataStore.data.map { prefs ->
         val saved = prefs[THEME_KEY]
-        ThemeOption.values().find { it.name == saved } ?: ThemeOption.SYSTEM
+        ThemeOption.entries.find { it.name == saved } ?: ThemeOption.SYSTEM
     }
 
     suspend fun saveTheme(option: ThemeOption) {

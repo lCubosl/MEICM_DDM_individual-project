@@ -32,16 +32,16 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.rememberTextMeasurer
 import com.example.alignment_tool.data.viewmodel.CamberViewModel
+import kotlin.collections.set
 
 @Composable
 fun CamberScreen(viewModel: CamberViewModel) {
     var selectedWheel by remember { mutableStateOf("FL") }
     val tilt by rememberTilt(context = LocalContext.current)
     val orientation = rememberOrientationAngles(context = LocalContext.current)
-    val roll = - orientation.value.third - 90f
+    val roll = -orientation.value.third - 90f
 
     var showConfirmDialog by remember { mutableStateOf(false) }
-    // stores camber values after pressing SAVE button
     val savedCambers = remember {
         mutableStateMapOf<String, Float?>(
             "FL" to null,
@@ -52,44 +52,22 @@ fun CamberScreen(viewModel: CamberViewModel) {
     }
 
     if (showConfirmDialog) {
-        AlertDialog(
-            onDismissRequest = { showConfirmDialog = false },
-            title = {
-                Text("Save All Cambers?")
-            },
-            text = {
-                Text("Are you sure that you want to save the current camber values?")
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        // SAVE using the ViewModel
-                        viewModel.saveMeasurement(
-                            fl = savedCambers["FL"],
-                            fr = savedCambers["FR"],
-                            rl = savedCambers["RL"],
-                            rr = savedCambers["RR"]
-                        )
-                        // Clear after saving
-                        savedCambers.keys.forEach { key -> savedCambers[key] = null }
-                        showConfirmDialog = false
-                    }
-                ) {
-                    Text("Yes", color = Color.Black)
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { showConfirmDialog = false }
-                ) {
-                    Text("No", color = Color.Black)
-                }
+        ConfirmSaveDialog(
+            onDismiss = { showConfirmDialog = false },
+            onConfirm = {
+                viewModel.saveMeasurement(
+                    fl = savedCambers["FL"],
+                    fr = savedCambers["FR"],
+                    rl = savedCambers["RL"],
+                    rr = savedCambers["RR"]
+                )
+                savedCambers.keys.forEach { it -> savedCambers[it] = null }
+                showConfirmDialog = false
             }
         )
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        // Top 80%: Level indicator
         val rotatedTilt = Pair(-tilt.first, -tilt.second)
         var lineColorGlobal by remember { mutableStateOf(Color.LightGray) }
         val allWheelsSaved = savedCambers.values.all { it != null }
@@ -102,10 +80,9 @@ fun CamberScreen(viewModel: CamberViewModel) {
             modifier = Modifier
                 .weight(0.8f)
                 .fillMaxWidth()
-                .graphicsLayer { rotationZ = 90f },
+                .graphicsLayer { rotationZ = 90f }
         )
 
-        // diagram and buttons
         Row(
             modifier = Modifier
                 .weight(0.2f)
@@ -114,84 +91,16 @@ fun CamberScreen(viewModel: CamberViewModel) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // Left: small wheel diagram
-            Column(
-                modifier = Modifier
-                    .weight(0.6f)
-                    .fillMaxHeight(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                // left side of car
-                Row(horizontalArrangement = Arrangement.spacedBy(32.dp)) {
-                    SmallWheel(
-                        label = "RL",
-                        isSelected = selectedWheel == "RL",
-                        savedCamber = savedCambers["RL"],
-                    ) { selectedWheel = "RL" }
-                    SmallWheel(
-                        label = "FL",
-                        isSelected = selectedWheel == "FL",
-                        savedCamber = savedCambers["FL"],
-                    ) { selectedWheel = "FL" }
-                }
+            WheelSelector(selectedWheel, savedCambers) { selectedWheel = it }
 
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // right side of car
-                Row(horizontalArrangement = Arrangement.spacedBy(32.dp)) {
-                    SmallWheel(
-                        label = "RR",
-                        isSelected = selectedWheel == "RR",
-                        savedCamber = savedCambers["RR"],
-                    ) { selectedWheel = "RR" }
-                    SmallWheel(
-                        label = "FR",
-                        isSelected = selectedWheel == "FR",
-                        savedCamber = savedCambers["FR"],
-                    ) { selectedWheel = "FR" }
-                }
-            }
-
-            // Right: buttons column rotated 90 degrees
-            Column(
-                modifier = Modifier
-                    .weight(0.4f)
-                    .fillMaxHeight()
-                    .graphicsLayer { rotationZ = 90f }, // rotate 90 degrees clockwise
-                verticalArrangement = Arrangement.SpaceEvenly,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // SAVE CAMBER TO WHEEL BUTTON
-                Button(
-                    onClick = {
-                        if (!allWheelsSaved) {
-                            // Normal Save for current wheel
-                            if (lineColorGlobal == Color.Green) {
-                                savedCambers[selectedWheel] = roll
-                            }
-                        } else {
-                            // Trigger confirmation dialog
-                            showConfirmDialog = true
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(0.8f),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (allWheelsSaved) Color(0xFF4CAF50) else MaterialTheme.colorScheme.primary
-                    )
-                ) {
-                    Text(if (allWheelsSaved) "Save All" else "Save", color = Color.White)
-                }
-
-                Button(
-                    onClick = { savedCambers[selectedWheel] = null },
-                    enabled = savedCambers[selectedWheel] != null,
-                    modifier = Modifier.fillMaxWidth(0.8f)
-                ) {
-                    Text("Reset")
-                }
-            }
-
+            WheelButtonsPanel(
+                allWheelsSaved = allWheelsSaved,
+                selectedWheel = selectedWheel,
+                roll = roll,
+                lineColor = lineColorGlobal,
+                savedCambers = savedCambers,
+                onSaveAllConfirmed = { showConfirmDialog = true }
+            )
         }
     }
 }
@@ -377,4 +286,106 @@ fun SmallWheel(
             }
         }
     }
+}
+
+@Composable
+fun WheelSelector(
+    selectedWheel: String,
+    savedCambers: Map<String, Float?>,
+    onWheelSelected: (String) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxHeight(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(32.dp)) {
+            SmallWheel("RL", selectedWheel == "RL", savedCambers["RL"]) { onWheelSelected("RL") }
+            SmallWheel("FL", selectedWheel == "FL", savedCambers["FL"]) { onWheelSelected("FL") }
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Row(horizontalArrangement = Arrangement.spacedBy(32.dp)) {
+            SmallWheel("RR", selectedWheel == "RR", savedCambers["RR"]) { onWheelSelected("RR") }
+            SmallWheel("FR", selectedWheel == "FR", savedCambers["FR"]) { onWheelSelected("FR") }
+        }
+    }
+}
+
+@Composable
+fun WheelButtonsPanel(
+    allWheelsSaved: Boolean,
+    selectedWheel: String,
+    roll: Float,
+    lineColor: Color,
+    savedCambers: MutableMap<String, Float?>,
+    onSaveAllConfirmed: () -> Unit,
+) {
+    // Right: buttons column rotated 90 degrees
+    Column(
+        modifier = Modifier
+            .fillMaxHeight()
+            .graphicsLayer { rotationZ = 90f },
+        verticalArrangement = Arrangement.SpaceEvenly,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // SAVE CAMBER TO WHEEL BUTTON
+        Button(
+            onClick = {
+                if (!allWheelsSaved) {
+                    // Normal Save for current wheel
+                    if (lineColor == Color.Green) {
+                        savedCambers[selectedWheel] = roll
+                    }
+                } else {
+                    // Trigger confirmation dialog
+                    onSaveAllConfirmed()
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth(0.7f)
+                .weight(0.5f),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (allWheelsSaved) Color(0xFF4CAF50) else MaterialTheme.colorScheme.primary
+            )
+        ) {
+            Text(if (allWheelsSaved) "Save All" else "Save", color = Color.White)
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Button(
+            onClick = { savedCambers[selectedWheel] = null },
+            enabled = savedCambers[selectedWheel] != null,
+            modifier = Modifier
+                .fillMaxWidth(0.7f)
+                .weight(0.5f)
+        ) {
+            Text("Reset")
+        }
+    }
+}
+
+@Composable
+fun ConfirmSaveDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Save All Cambers?") },
+        text = { Text("Are you sure that you want to save the current camber values?") },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text("Yes", color = Color.Black)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("No", color = Color.Black)
+            }
+        }
+    )
 }
