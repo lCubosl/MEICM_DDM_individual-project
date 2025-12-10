@@ -23,12 +23,9 @@ fun SavedValuesScreen(
     repoToe: ToeRepository,
     repoCamber: CamberRepository
 ) {
-
-    // Toe ViewModel with factory
     val toeViewModel: ToeViewModel = viewModel(factory = ToeViewModelFactory(repoToe))
-    val camberViewModel: CamberViewModel = viewModel (factory = CamberViewModelFactory(repoCamber))
+    val camberViewModel: CamberViewModel = viewModel(factory = CamberViewModelFactory(repoCamber))
 
-    // Collect flows
     val toeMeasurements by toeViewModel.allMeasurements.collectAsState(initial = emptyList())
     val camberMeasurements by camberViewModel.allMeasurements.collectAsState(initial = emptyList())
 
@@ -37,48 +34,27 @@ fun SavedValuesScreen(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Text(
-            text = "Saved Alignments",
-            style = MaterialTheme.typography.headlineMedium
+        Text("Saved Alignments", style = MaterialTheme.typography.headlineMedium)
+        Spacer(Modifier.height(16.dp))
+
+        MeasurementsSection(
+            title = "Toe Measurements",
+            measurements = toeMeasurements,
+            emptyMessage = "No Toe Measurements saved",
+            itemContent = { MeasurementCard(it) }
         )
 
         Spacer(Modifier.height(16.dp))
 
-        // ----- Toe Measurements -----
-        Text("Toe Measurements", style = MaterialTheme.typography.titleMedium)
-        Spacer(Modifier.height(8.dp))
-        if (toeMeasurements.isEmpty()) {
-            Text("No Toe Measurements saved")
-        } else {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.weight(1f)
-            ) {
-                items(toeMeasurements) { item ->
-                    MeasurementCard(item)
-                }
-            }
-        }
-
-        Spacer(Modifier.height(16.dp))
-
-        // ----- Camber Measurements -----
-        Text("Camber Measurements", style = MaterialTheme.typography.titleMedium)
-        Spacer(Modifier.height(8.dp))
-        if (camberMeasurements.isEmpty()) {
-            Text("No Camber Measurements saved")
-        } else {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.weight(1f)
-            ) {
-                items(camberMeasurements) { item ->
-                    CamberMeasurementCard(item)
-                }
-            }
-        }
+        MeasurementsSection(
+            title = "Camber Measurements",
+            measurements = camberMeasurements,
+            emptyMessage = "No Camber Measurements saved",
+            itemContent = { CamberMeasurementCard(it) }
+        )
     }
 }
+
 
 @Composable
 fun MeasurementCard(item: ToeMeasurement) {
@@ -110,6 +86,32 @@ fun CamberMeasurementCard(item: CamberMeasurement) {
             Text("FR Camber: ${item.frCamber}")
             Text("RL Camber: ${item.rlCamber}")
             Text("RR Camber: ${item.rrCamber}")
+        }
+    }
+}
+
+@Composable
+fun <T> MeasurementsSection(
+    title: String,
+    measurements: List<T>,
+    emptyMessage: String,
+    itemContent: @Composable (T) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(title, style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(8.dp))
+
+        if (measurements.isEmpty()) {
+            Text(emptyMessage)
+        } else {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxHeight()
+            ) {
+                items(measurements) { item ->
+                    itemContent(item)
+                }
+            }
         }
     }
 }
