@@ -38,9 +38,18 @@ App built in Kotlin using Jetpack Compose.
 
 ## Demo Screens
 #### Toe Screen
+![04](https://github.com/user-attachments/assets/5772510d-48af-47dc-8153-d422d37270ff)
+![03](https://github.com/user-attachments/assets/fff6c21b-53e1-417b-ad1b-fb66bcb9245d)
+
 #### Camber Screen
+![05](https://github.com/user-attachments/assets/9c820190-9169-4b98-831f-0eed0acbd603)
+![02](https://github.com/user-attachments/assets/8b7a51e3-6506-40ef-a6d9-698489f64480)
+
 #### Saved Screen
+![01](https://github.com/user-attachments/assets/34550e4e-f039-4225-b810-612b27f0712e)
+
 #### Settings Screen
+![00](https://github.com/user-attachments/assets/a03db3ae-43b5-4531-b06c-722b87e312a9)
 
 ### TODO
 * UI needs to be improved upon
