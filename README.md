@@ -64,3 +64,20 @@ App built in Kotlin using Jetpack Compose.
 * Additional screens
   * Standalone angle Screen for torques + angle
   * Caster Screen
+
+# Download steps
+> In order for you to have access to all the features in this project, you will need to create an account in [CarAPI](https://carapi.app/profile/users/api), go to this link: https://carapi.app/profile/users/api and copy your API Token and API Secret, since you will need them later. 
+After you have your API Token and API Secret:
+1. Clone the project to desired directory
+2. On that same directory create a file called `apikey`
+3. Inside of `apikey` create a file called `ApiKeys.kt`, this will be where you store your `CAR_API_KEY` and `CAR_API_SECRET`
+4. the file should look like this:
+```javascript
+package com.example.alignment_tool.apikey
+
+CAR_API_KEY= put_your_api_key_here
+CAR_API_SECRET= put_your_api_key_here
+```
+5. Assemble App Run Configuration (Ctrl+F9)
+6. Run App (Shift+F10)
+7. Project should be up and running
