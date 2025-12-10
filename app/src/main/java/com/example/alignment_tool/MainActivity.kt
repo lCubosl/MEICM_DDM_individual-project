@@ -31,16 +31,15 @@ import com.example.alignment_tool.data.viewmodel.CamberViewModelFactory
 import com.example.alignment_tool.data.viewmodel.CarViewModel
 import com.example.alignment_tool.data.viewmodel.CarViewModelFactory
 import com.example.alignment_tool.data.viewmodel.ThemeViewModelFactory
+import com.example.alignment_tool.apikey.ApiKeys
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-
-            // FOR THE LOVE OF GOD THIS SHOULD GO A .ENV
             val api = CarApiClient.createService(
-                apiKey = "21334d2c-b7cb-498e-9402-e115645ecf23",
-                apiSecret = "6235b270ef22d10e211808bfdff7b76e"
+                apiKey = ApiKeys.CAR_API_KEY,
+                apiSecret = ApiKeys.CAR_API_SECRET
             )
 
             // CAR API

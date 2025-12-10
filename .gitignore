@@ -13,3 +13,6 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+.ApiKeys.kt
+/app/src/main/java/com/example/alignment_tool/apikey/ApiKeys.kt

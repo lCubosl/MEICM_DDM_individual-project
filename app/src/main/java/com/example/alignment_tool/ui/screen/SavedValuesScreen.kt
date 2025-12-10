@@ -41,7 +41,8 @@ fun SavedValuesScreen(
             title = "Toe Measurements",
             measurements = toeMeasurements,
             emptyMessage = "No Toe Measurements saved",
-            itemContent = { MeasurementCard(it) }
+            itemContent = { MeasurementCard(it) },
+            modifier = Modifier.weight(1f)
         )
 
         Spacer(Modifier.height(16.dp))
@@ -50,7 +51,8 @@ fun SavedValuesScreen(
             title = "Camber Measurements",
             measurements = camberMeasurements,
             emptyMessage = "No Camber Measurements saved",
-            itemContent = { CamberMeasurementCard(it) }
+            itemContent = { CamberMeasurementCard(it) },
+            modifier = Modifier.weight(1f)
         )
     }
 }
@@ -95,9 +97,10 @@ fun <T> MeasurementsSection(
     title: String,
     measurements: List<T>,
     emptyMessage: String,
-    itemContent: @Composable (T) -> Unit
+    itemContent: @Composable (T) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = modifier.fillMaxWidth()) {
         Text(title, style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(8.dp))
 
@@ -106,7 +109,7 @@ fun <T> MeasurementsSection(
         } else {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxHeight()
+                modifier = Modifier.fillMaxSize()
             ) {
                 items(measurements) { item ->
                     itemContent(item)
