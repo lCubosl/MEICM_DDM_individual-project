@@ -20,6 +20,9 @@ import androidx.compose.ui.unit.sp
 import com.example.alignment_tool.data.viewmodel.CarViewModel
 import com.example.alignment_tool.data.model.ThemeOption
 
+// ----------------------------------------------------------
+// MAIN SETTINGS SCREEN WHERE @COMPOSABLES ARE CALLED
+// ----------------------------------------------------------
 @Composable
 fun SettingsScreen(
     currentTheme: ThemeOption,
@@ -50,7 +53,7 @@ fun SettingsScreen(
 }
 
 // ----------------------------------------------------------
-//  THEME BUTTONS SLEECTOR
+//  THEME BUTTONS SLEECTOR @COMPOSABLE
 // ----------------------------------------------------------
 @Composable
 fun ThemeSegmentedControl(
@@ -134,6 +137,9 @@ fun ThemeSegmentedControl(
     }
 }
 
+// ----------------------------------------------------------
+// VEHICLE MAKE AND MODEL SELECTOR @COMPOSABLE
+// ----------------------------------------------------------
 @Composable
 fun CarSelector(carViewModel: CarViewModel) {
     val makes by carViewModel.makes.collectAsState()

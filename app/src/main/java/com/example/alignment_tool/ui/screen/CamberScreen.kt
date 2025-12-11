@@ -34,6 +34,9 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import com.example.alignment_tool.data.viewmodel.CamberViewModel
 import kotlin.collections.set
 
+// ----------------------------------------------------------
+// MAIN CAMBER SCREEN WHERE @COMPOSABLES ARE CALLED
+// ----------------------------------------------------------
 @Composable
 fun CamberScreen(viewModel: CamberViewModel) {
     var selectedWheel by remember { mutableStateOf("FL") }
@@ -105,6 +108,9 @@ fun CamberScreen(viewModel: CamberViewModel) {
     }
 }
 
+// ----------------------------------------------------------
+// LEVEL INDICATOR. INDICATES PHONE TILT (ROLL)
+// ----------------------------------------------------------
 @Composable
 fun LevelIndicator(
     tilt: Pair<Float, Float>,
@@ -209,6 +215,9 @@ fun LevelIndicator(
     }
 }
 
+// ----------------------------------------------------------
+// TODO
+// ----------------------------------------------------------
 @Composable
 fun rememberOrientationAngles(context: Context): State<Triple<Float, Float, Float>> {
 
@@ -246,6 +255,9 @@ fun rememberOrientationAngles(context: Context): State<Triple<Float, Float, Floa
     return orientation
 }
 
+// ----------------------------------------------------------
+// SMALL WHEELS AT BOTTOM RIGHT OF THE SCREEN @COMPOSABLE
+// ----------------------------------------------------------
 @Composable
 fun SmallWheel(
     label: String,
@@ -288,6 +300,9 @@ fun SmallWheel(
     }
 }
 
+// ----------------------------------------------------------
+// WHEEL SELECTOR @COMPOSABLES
+// ----------------------------------------------------------
 @Composable
 fun WheelSelector(
     selectedWheel: String,
@@ -314,6 +329,9 @@ fun WheelSelector(
     }
 }
 
+// ----------------------------------------------------------
+// BUTTONS PANEL @COMPOSABLE
+// ----------------------------------------------------------
 @Composable
 fun WheelButtonsPanel(
     allWheelsSaved: Boolean,
@@ -368,6 +386,9 @@ fun WheelButtonsPanel(
     }
 }
 
+// ----------------------------------------------------------
+// OVERLAY CONFIRMATION. IF YES SAVES DATA TO LOCAL DATABASE
+// ----------------------------------------------------------
 @Composable
 fun ConfirmSaveDialog(
     onDismiss: () -> Unit,
