@@ -26,7 +26,12 @@ fun BottomNavigationBar(navController: NavHostController) {
                         }
                     }
                 },
-                icon = {}
+                icon = {
+                    Icon(
+                        imageVector = screen.icon,
+                        contentDescription = screen.title
+                    )
+                }
             )
         }
     }

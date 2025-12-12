@@ -1,5 +1,10 @@
 package com.example.alignment_tool.navigation
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -10,6 +15,7 @@ import com.example.alignment_tool.ui.screen.CamberScreen
 import com.example.alignment_tool.ui.screen.ToeScreen
 import com.example.alignment_tool.ui.screen.SavedValuesScreen
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.alignment_tool.data.model.ThemeOption
 import com.example.alignment_tool.data.repository.CamberRepository
 import com.example.alignment_tool.ui.screen.SettingsScreen
@@ -19,11 +25,15 @@ import com.example.alignment_tool.data.repository.ToeRepository
 import com.example.alignment_tool.data.viewmodel.CamberViewModel
 import com.example.alignment_tool.data.viewmodel.CarViewModel
 
-sealed class Screen(val route: String, val title: String) {
-    object Toe : Screen("toe", "Toe")
-    object Camber : Screen("camber", "Camber")
-    object SavedValues : Screen("savedValues", "Saved")
-    object Settings : Screen("settings", "Settings")
+sealed class Screen(
+    val route: String,
+    val title: String,
+    val icon: ImageVector
+) {
+    object Toe : Screen("toe", "Toe", Icons.Default.Settings)
+    object Camber : Screen("camber", "Camber", Icons.Default.Tune)
+    object SavedValues : Screen("savedValues", "Saved", Icons.Default.Save)
+    object Settings : Screen("settings", "Settings", Icons.Default.Settings)
 }
 
 @Composable
