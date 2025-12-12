@@ -17,6 +17,7 @@ import com.example.alignment_tool.data.viewmodel.CamberViewModel
 import com.example.alignment_tool.data.viewmodel.CamberViewModelFactory
 import com.example.alignment_tool.data.viewmodel.ToeViewModel
 import com.example.alignment_tool.data.viewmodel.ToeViewModelFactory
+import com.example.alignment_tool.util.toReadableDate
 
 @Composable
 fun SavedValuesScreen(
@@ -65,7 +66,7 @@ fun MeasurementCard(item: ToeMeasurement) {
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
-            Text("Date: ${item.date}")
+            Text("Date: ${item.date.toReadableDate()}")
             Text("FL: ${item.flAngle}")
             Text("FR: ${item.frAngle}")
             Text("RL: ${item.rlAngle}")
@@ -83,7 +84,7 @@ fun CamberMeasurementCard(item: CamberMeasurement) {
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
-            Text("Date: ${item.date}")
+            Text("Date: ${item.date.toReadableDate()}")
             Text("FL Camber: ${item.flCamber}")
             Text("FR Camber: ${item.frCamber}")
             Text("RL Camber: ${item.rlCamber}")

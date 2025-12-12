@@ -1,9 +1,11 @@
 package com.example.alignment_tool.navigation
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CarRepair
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.TimeToLeave
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -30,8 +32,8 @@ sealed class Screen(
     val title: String,
     val icon: ImageVector
 ) {
-    object Toe : Screen("toe", "Toe", Icons.Default.Settings)
-    object Camber : Screen("camber", "Camber", Icons.Default.Tune)
+    object Toe : Screen("toe", "Toe", Icons.Default.CarRepair)
+    object Camber : Screen("camber", "Camber", Icons.Default.TimeToLeave)
     object SavedValues : Screen("savedValues", "Saved", Icons.Default.Save)
     object Settings : Screen("settings", "Settings", Icons.Default.Settings)
 }
