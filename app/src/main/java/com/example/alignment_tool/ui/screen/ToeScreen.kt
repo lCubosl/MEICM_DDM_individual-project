@@ -38,33 +38,26 @@ fun rememberYaw(context: Context): State<Float> {
     val yawState = remember { mutableFloatStateOf(0f) }
 
     DisposableEffect(Unit) {
-        val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        val rotationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
+        val sm = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        val sensor = sm.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
 
         val listener = object : SensorEventListener {
-            val rotationMatrix = FloatArray(9)
-            val orientationAngles = FloatArray(3)
+            val rot = FloatArray(9)
+            val ori = FloatArray(3)
 
             override fun onSensorChanged(event: SensorEvent) {
-                SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
-                SensorManager.getOrientation(rotationMatrix, orientationAngles)
-
-                val yawRad = orientationAngles[0]
-                var yawDeg = Math.toDegrees(yawRad.toDouble()).toFloat()
-
-                if (yawDeg < 0) yawDeg += 360f
-
-                yawState.floatValue = yawDeg
+                SensorManager.getRotationMatrixFromVector(rot, event.values)
+                SensorManager.getOrientation(rot, ori)
+                var yaw = Math.toDegrees(ori[0].toDouble()).toFloat()
+                if (yaw < 0) yaw += 360f
+                yawState.floatValue = yaw
             }
 
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
         }
 
-        sensorManager.registerListener(listener, rotationSensor, SensorManager.SENSOR_DELAY_GAME)
-
-        onDispose {
-            sensorManager.unregisterListener(listener)
-        }
+        sm.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_GAME)
+        onDispose { sm.unregisterListener(listener) }
     }
     return yawState
 }
@@ -139,14 +132,12 @@ fun ToeScreen(viewModel: ToeViewModel) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Top label
+            // FRONT OF THE CAR
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("^", fontSize = 36.sp, color = Color(0xFF90CAF9), fontWeight = FontWeight.Bold)
                 Text("Front", fontSize = 22.sp, color = Color(0xFF90CAF9), fontWeight = FontWeight.Bold)
             }
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-
                 // FRONT WHEELS
                 Row(
                     modifier = Modifier.fillMaxWidth(),
