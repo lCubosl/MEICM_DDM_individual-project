@@ -135,6 +135,9 @@ fun ToeScreen(viewModel: ToeViewModel) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
+            // sanity check
+            Text("yaw %.3f" .format(yaw))
+
             // FRONT OF THE CAR
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("Front", fontSize = 22.sp, color = Color(0xFF90CAF9), fontWeight = FontWeight.Bold)
