@@ -32,6 +32,9 @@ import com.example.alignment_tool.data.viewmodel.ToeViewModel
 
 // ----------------------------------------------------------
 // REMEMBER PHONE YAW (heading) using the Rotation Vector sensor
+// yaw is very sensitive and can be affected by metal objects, nearby electronics, etc,
+// yaw is not a good way to track toe since TYPE_ROTATION_VECTOR is a combination of gyro, accelerometer and Magnetometer
+// gyro (noisy, sensitive and drifts), magnetometer (noisy, affected by metal and electronics)
 // ----------------------------------------------------------
 @Composable
 fun rememberYaw(context: Context): State<Float> {
@@ -253,7 +256,7 @@ fun WheelWithLabelAndValue(
 
         // Reserve fixed height for the value text
         Text(
-            text = value?.let { "%.2f°".format(it) } ?: "",
+            text = "%.2f°".format(value ?: 0f)            ,
             fontSize = 16.sp,
             fontWeight = FontWeight.Normal,
             modifier = Modifier.height(20.dp), // Reserve space so layout doesn't change
