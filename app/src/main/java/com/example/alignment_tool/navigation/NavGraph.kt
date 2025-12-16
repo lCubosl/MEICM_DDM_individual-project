@@ -2,11 +2,9 @@ package com.example.alignment_tool.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CarRepair
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.TimeToLeave
-import androidx.compose.material.icons.filled.Tune
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -14,7 +12,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.alignment_tool.ui.screen.CamberScreen
-import com.example.alignment_tool.ui.screen.ToeScreen
+import com.example.alignment_tool.ui.screen.toe.ToeScreen
 import com.example.alignment_tool.ui.screen.SavedValuesScreen
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
