@@ -17,6 +17,9 @@ import com.example.alignment_tool.data.viewmodel.CamberViewModel
 import com.example.alignment_tool.data.viewmodel.CamberViewModelFactory
 import com.example.alignment_tool.data.viewmodel.ToeViewModel
 import com.example.alignment_tool.data.viewmodel.ToeViewModelFactory
+import com.example.alignment_tool.ui.components.measurements.CamberMeasurementCard
+import com.example.alignment_tool.ui.components.measurements.MeasurementCard
+import com.example.alignment_tool.ui.components.measurements.MeasurementsSection
 import com.example.alignment_tool.util.toReadableDate
 
 @Composable
@@ -35,7 +38,7 @@ fun SavedValuesScreen(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Text("Saved Alignments", style = MaterialTheme.typography.headlineMedium)
+        Text("Saved Measurements", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(16.dp))
 
         MeasurementsSection(
@@ -55,67 +58,5 @@ fun SavedValuesScreen(
             itemContent = { CamberMeasurementCard(it) },
             modifier = Modifier.weight(1f)
         )
-    }
-}
-
-
-@Composable
-fun MeasurementCard(item: ToeMeasurement) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(4.dp)
-    ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Text("Date: ${item.date.toReadableDate()}")
-            Text("FL: ${item.flAngle}")
-            Text("FR: ${item.frAngle}")
-            Text("RL: ${item.rlAngle}")
-            Text("RR: ${item.rrAngle}")
-            Text("Front Toe: ${item.fToe}")
-            Text("Rear Toe: ${item.rToe}")
-        }
-    }
-}
-
-@Composable
-fun CamberMeasurementCard(item: CamberMeasurement) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(4.dp)
-    ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Text("Date: ${item.date.toReadableDate()}")
-            Text("FL Camber: ${item.flCamber}")
-            Text("FR Camber: ${item.frCamber}")
-            Text("RL Camber: ${item.rlCamber}")
-            Text("RR Camber: ${item.rrCamber}")
-        }
-    }
-}
-
-@Composable
-fun <T> MeasurementsSection(
-    title: String,
-    measurements: List<T>,
-    emptyMessage: String,
-    itemContent: @Composable (T) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        Text(title, style = MaterialTheme.typography.titleMedium)
-        Spacer(Modifier.height(8.dp))
-
-        if (measurements.isEmpty()) {
-            Text(emptyMessage)
-        } else {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(measurements) { item ->
-                    itemContent(item)
-                }
-            }
-        }
     }
 }
