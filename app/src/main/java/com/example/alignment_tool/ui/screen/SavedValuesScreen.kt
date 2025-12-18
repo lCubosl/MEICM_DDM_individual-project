@@ -1,16 +1,11 @@
 package com.example.alignment_tool.ui.screen
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.alignment_tool.data.db.CamberMeasurement
-import com.example.alignment_tool.data.db.ToeMeasurement
 import com.example.alignment_tool.data.repository.CamberRepository
 import com.example.alignment_tool.data.repository.ToeRepository
 import com.example.alignment_tool.data.viewmodel.CamberViewModel
@@ -20,7 +15,6 @@ import com.example.alignment_tool.data.viewmodel.ToeViewModelFactory
 import com.example.alignment_tool.ui.components.measurements.CamberMeasurementCard
 import com.example.alignment_tool.ui.components.measurements.MeasurementCard
 import com.example.alignment_tool.ui.components.measurements.MeasurementsSection
-import com.example.alignment_tool.util.toReadableDate
 
 @Composable
 fun SavedValuesScreen(
