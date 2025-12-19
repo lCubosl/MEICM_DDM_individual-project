@@ -2,7 +2,6 @@ package com.example.alignment_tool.data.repository
 
 import com.example.alignment_tool.data.remote.CarApiService
 import com.example.alignment_tool.data.remote.model.CarMake
-import com.example.alignment_tool.data.remote.model.CarMakeResponse
 import com.example.alignment_tool.data.remote.model.CarModel
 
 class CarRepository(private val api: CarApiService) {

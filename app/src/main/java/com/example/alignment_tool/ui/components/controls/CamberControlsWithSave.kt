@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.Color
 
 // ----------------------------------------------------------
 // OVERLAY CONFIRMATION. IF YES SAVES DATA TO LOCAL DATABASE
+// TODO JOIN CAMBERCONTROLSWITH SAVE AND TOECONTROLSWITHSAVE SINCE THEY ARE THE SAME
 // ----------------------------------------------------------
 @Composable
 fun CamberControlsWithSave(

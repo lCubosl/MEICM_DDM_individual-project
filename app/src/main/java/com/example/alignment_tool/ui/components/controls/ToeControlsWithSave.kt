@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 
 // ----------------------------------------------------------
 //  TOE BUTTONS
+// TODO JOIN CAMBERCONTROLSWITH SAVE AND TOECONTROLSWITHSAVE SINCE THEY ARE THE SAME
 // ----------------------------------------------------------
 @Composable
 fun ToeControlsWithSave(

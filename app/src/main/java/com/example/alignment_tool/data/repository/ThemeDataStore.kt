@@ -1,4 +1,4 @@
-package com.example.alignment_tool.data.datastore
+package com.example.alignment_tool.data.repository
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
