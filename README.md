@@ -1,9 +1,9 @@
 # Alignment Tool
-Project for my Master's degree in Computer Engineering - Mobile Computing. This work is part of the individual project for the Mobile Devices Development course.
+* Project for my Master's degree in Computer Engineering - Mobile Computing. This work is part of the individual project for the Mobile Devices Development course.
 
-It is an alignment tool that can be used to check camber and toe values in various vehicles by make and model. These values are stored in local storage so they can be checked later for logging and monitoring purposes.
+* It is an alignment tool that can be used to check camber and toe values in various vehicles by make and model. These values are stored in local storage so they can be checked later for logging and monitoring purposes.
 
-App built in Kotlin using Jetpack Compose.
+* App built in Kotlin using Jetpack Compose.
 
 ## Functionality
 ### Features
